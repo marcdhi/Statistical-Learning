@@ -254,7 +254,7 @@
                         <div>
                             <div class="value-label">Density</div>
                             <div class="value-number">--</div>
-                            <div class="value-unit">g/cm³</div>
+                            <div class="value-unit">kg/m³</div>
                         </div>
                     </div>
                 </div>
@@ -265,7 +265,7 @@
                         <div>
                             <div class="value-label">Viscosity</div>
                             <div class="value-number">--</div>
-                            <div class="value-unit">Pa·s</div>
+                            <div class="value-unit">mPa·s</div>
                         </div>
                     </div>
                 </div>
@@ -279,24 +279,14 @@
             </div>
             <div class="card-body">
                 <div class="tabs-container">
-                    <button class="tab-btn active" data-tab="plot-tab">Static Plot</button>
-                    <button class="tab-btn" data-tab="animation-tab">Dynamic Animation</button>
+                    <button class="tab-btn active" data-tab="animation-tab">Dynamic Animation</button>
                 </div>
                 
-                <div id="plot-tab" class="tab-content active">
-                    <div id="plot-area"></div>
-                </div>
-                
-                <div id="animation-tab" class="tab-content">
-                    <div class="text-center mb-3">
-                        <button id="generate-animation-btn" class="btn btn-primary">
-                            <i class="fas fa-film me-2"></i>Show Animation
-                        </button>
-                    </div>
+                <div id="animation-tab" class="tab-content active">
                     <div id="animation-container">
                         <div class="text-center text-muted">
                             <i class="fas fa-film fa-3x mb-3"></i>
-                            <p>Select a material and click "Show Animation" to visualize the damped response.</p>
+                            <p>Select a material and click "Run Analysis" to visualize the damped response.</p>
                         </div>
                     </div>
                 </div>
@@ -317,9 +307,7 @@
         const pathSelect = document.getElementById('path-select');
         const densityOutput = document.getElementById('density-output');
         const viscosityOutput = document.getElementById('viscosity-output');
-        const plotArea = document.getElementById('plot-area');
         const animationContainer = document.getElementById('animation-container');
-        const generateAnimationBtn = document.getElementById('generate-animation-btn');
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
 
@@ -341,69 +329,6 @@
             });
         });
         
-        // Handle animation generation
-        generateAnimationBtn.addEventListener('click', function() {
-            const selectedPath = pathSelect.value;
-            
-            if (!selectedPath || selectedPath === "Choose a path...") {
-                alert("Please select a material first.");
-                return;
-            }
-            
-            // Show loading indicator
-            animationContainer.innerHTML = `
-                <div class="text-center">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p>Loading animation for ${selectedPath}...</p>
-                </div>
-            `;
-            
-            // Request the animation
-            fetch('/generate_animation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ material: selectedPath }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || 'Failed to generate animation');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success && data.animation_path) {
-                    // Add timestamp to prevent caching
-                    const timestamp = new Date().getTime();
-                    const animationPath = `${data.animation_path}?t=${timestamp}`;
-                    
-                    // Display the animation
-                    animationContainer.innerHTML = `
-                        <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
-                    `;
-                } else {
-                    throw new Error('Animation generation failed');
-                }
-            })
-            .catch(error => {
-                console.error('Animation Error:', error);
-                animationContainer.innerHTML = `
-                    <div class="text-center text-danger">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <p>${error.message}</p>
-                        <button class="btn btn-outline-primary mt-3" onclick="document.getElementById('generate-animation-btn').click()">
-                            <i class="fas fa-redo me-2"></i>Try Again
-                        </button>
-                    </div>
-                `;
-            });
-        });
-
         function updateResults(data) {
             console.log("Updating results with data:", data);
             
@@ -415,7 +340,7 @@
                 <div>
                     <div class="value-label">Density</div>
                     <div class="value-number">${densityMatch ? densityMatch[1] : '--'}</div>
-                    <div class="value-unit">g/cm³</div>
+                    <div class="value-unit">kg/m³</div>
                 </div>
             `;
             
@@ -423,44 +348,9 @@
                 <div>
                     <div class="value-label">Viscosity</div>
                     <div class="value-number">${viscosityMatch ? viscosityMatch[1] : '--'}</div>
-                    <div class="value-unit">Pa·s</div>
+                    <div class="value-unit">mPa·s</div>
                 </div>
             `;
-
-            // For simplified test, let's use basic chart creation
-            if (data.plot_json) {
-                try {
-                    console.log("Attempting to parse plot data");
-                    const plotData = JSON.parse(data.plot_json);
-                    console.log("Plot data parsed successfully");
-                    
-                    // Create a simple plot instead of using the complex one
-                    const simpleData = [{
-                        x: Array.from({length: 10}, (_, i) => i + 1),
-                        y: Array.from({length: 10}, () => Math.random() * 5 + 1),
-                        type: 'scatter',
-                        mode: 'lines+markers',
-                        name: 'Material Property',
-                        line: { color: '#1a365d', width: 3 },
-                        marker: { color: '#2c5282', size: 8 }
-                    }];
-                    
-                    const layout = {
-                        title: 'Material Property Analysis',
-                        xaxis: { title: 'Sample Index' },
-                        yaxis: { title: 'Property Value' }
-                    };
-                    
-                    Plotly.newPlot(plotArea, simpleData, layout);
-                    console.log("Simple plot created successfully");
-                } catch (e) {
-                    console.error("Error handling plot data:", e);
-                    plotArea.innerHTML = `<div class="text-center text-danger py-5">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <p>Error rendering plot: ${e.message}</p>
-                    </div>`;
-                }
-            }
         }
 
         // Handle Form Submission
@@ -484,7 +374,59 @@
 
             densityOutput.innerHTML = loadingHTML;
             viscosityOutput.innerHTML = loadingHTML;
-            plotArea.innerHTML = '<div class="d-flex justify-content-center align-items-center" style="height: 400px"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            // Also load the animation automatically
+            if (selectedPath && selectedPath !== "Choose a path...") {
+                // Show loading indicator for animation
+                animationContainer.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading animation for ${selectedPath}...</p>
+                    </div>
+                `;
+                
+                // Request the animation
+                fetch('/generate_animation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ material: selectedPath }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Failed to generate animation');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.animation_path) {
+                        // Add timestamp to prevent caching
+                        const timestamp = new Date().getTime();
+                        const animationPath = `${data.animation_path}?t=${timestamp}`;
+                        
+                        // Display the animation
+                        animationContainer.innerHTML = `
+                            <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
+                        `;
+                    } else {
+                        throw new Error('Animation generation failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Animation Error:', error);
+                    animationContainer.innerHTML = `
+                        <div class="text-center text-danger">
+                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                });
+            }
 
             console.log("Sending request to /predict endpoint");
             fetch('/predict', {
@@ -515,7 +457,6 @@
                     `;
                     densityOutput.innerHTML = errorHTML;
                     viscosityOutput.innerHTML = errorHTML;
-                    plotArea.innerHTML = '<div class="text-center text-danger py-5"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Could not retrieve data.</p></div>';
                 } else {
                     updateResults(data);
                 }
@@ -532,7 +473,6 @@
                 `;
                 densityOutput.innerHTML = networkErrorHTML;
                 viscosityOutput.innerHTML = networkErrorHTML;
-                plotArea.innerHTML = '<div class="text-center text-danger py-5"><i class="fas fa-exclamation-triangle fa-3x mb-3"></i><p>Failed to connect to the server: ' + error.message + '</p></div>';
             });
         });
     </script>

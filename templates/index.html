@@ -147,6 +147,49 @@
             margin-right: 15px;
             background-color: white;
         }
+        
+        #animation-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            padding: 1rem;
+        }
+        
+        .animation-gif {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tabs-container {
+            margin-bottom: 1rem;
+        }
+        
+        .tab-btn {
+            border: none;
+            background-color: #f1f5f9;
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 500;
+            color: #718096;
+            margin-right: 5px;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-btn.active {
+            color: #1a365d;
+            background-color: white;
+            border-bottom: 3px solid #1a365d;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -229,13 +272,34 @@
             </div>
         </div>
 
-        <!-- Plot Section -->
+        <!-- Visualization Tabs -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-chart-line me-2"></i>Analysis Visualization
             </div>
             <div class="card-body">
-                <div id="plot-area"></div>
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="plot-tab">Static Plot</button>
+                    <button class="tab-btn" data-tab="animation-tab">Dynamic Animation</button>
+                </div>
+                
+                <div id="plot-tab" class="tab-content active">
+                    <div id="plot-area"></div>
+                </div>
+                
+                <div id="animation-tab" class="tab-content">
+                    <div class="text-center mb-3">
+                        <button id="generate-animation-btn" class="btn btn-primary">
+                            <i class="fas fa-film me-2"></i>Show Animation
+                        </button>
+                    </div>
+                    <div id="animation-container">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-film fa-3x mb-3"></i>
+                            <p>Select a material and click "Show Animation" to visualize the damped response.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -254,9 +318,91 @@
         const densityOutput = document.getElementById('density-output');
         const viscosityOutput = document.getElementById('viscosity-output');
         const plotArea = document.getElementById('plot-area');
+        const animationContainer = document.getElementById('animation-container');
+        const generateAnimationBtn = document.getElementById('generate-animation-btn');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         // Add debug logging
         console.log("Main script initialized");
+        
+        // Tab switching functionality
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and tabs
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(tab => tab.classList.remove('active'));
+                
+                // Add active class to current button and tab
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Handle animation generation
+        generateAnimationBtn.addEventListener('click', function() {
+            const selectedPath = pathSelect.value;
+            
+            if (!selectedPath || selectedPath === "Choose a path...") {
+                alert("Please select a material first.");
+                return;
+            }
+            
+            // Show loading indicator
+            animationContainer.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading animation for ${selectedPath}...</p>
+                </div>
+            `;
+            
+            // Request the animation
+            fetch('/generate_animation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ material: selectedPath }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to generate animation');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.animation_path) {
+                    // Add timestamp to prevent caching
+                    const timestamp = new Date().getTime();
+                    const animationPath = `${data.animation_path}?t=${timestamp}`;
+                    
+                    // Display the animation
+                    animationContainer.innerHTML = `
+                        <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
+                    `;
+                } else {
+                    throw new Error('Animation generation failed');
+                }
+            })
+            .catch(error => {
+                console.error('Animation Error:', error);
+                animationContainer.innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <p>${error.message}</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="document.getElementById('generate-animation-btn').click()">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </button>
+                    </div>
+                `;
+            });
+        });
 
         function updateResults(data) {
             console.log("Updating results with data:", data);
@@ -392,5 +538,4 @@
     </script>
 
 </body>
-</html>
 </html>

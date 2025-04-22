@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import random
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -11,6 +11,8 @@ import joblib
 from rocket import RocketPredictor
 from thresholds import thres
 import pandas as pd
+import os
+from animation import create_animation_for_web
 
 
 # --- Configuration ---
@@ -50,9 +52,9 @@ def ml_process(path):
 def ml_model(path):
     """Simulates ML model prediction based on path."""
     path_data = {
-        "Amla Oil": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Amla_Oil.csv"),  # Standard material
-        "Ghee": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Ghee.csv"),  # Light material
-        "Pepsi": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Pepsi.csv"),  # Dense material
+        "Amla Oil": ml_process(r"./tests/Amla_Oil.csv"),  # Standard material
+        "Ghee": ml_process(r"./tests/Ghee.csv"),  # Light material
+        "Pepsi": ml_process(r"./tests/Pepsi.csv"),  # Dense material
     }
     return path_data.get(path, (0.0, 0.0))
 
@@ -232,6 +234,33 @@ def predict():
         })
     except Exception as e:
         print(f"Error during prediction: {e}")
+        print(traceback.format_exc())
+        return jsonify({'error': f'An internal error occurred: {str(e)}'}), 500
+
+@app.route('/generate_animation', methods=['POST'])
+def create_animation():
+    """Return the path to a pre-generated animation GIF for the selected material."""
+    try:
+        data = request.get_json()
+        material_name = data.get('material', '')
+        
+        if not material_name or material_name == "Choose a path...":
+            return jsonify({'error': 'Please select a valid material'}), 400
+        
+        # Construct the path to the pre-generated animation file
+        gif_path = f'static/animations/professional_damping_{material_name.lower().replace(" ", "_")}.gif'
+        
+        # Check if the file exists
+        if os.path.exists(gif_path):
+            return jsonify({
+                'success': True,
+                'animation_path': gif_path
+            })
+        else:
+            return jsonify({'error': f'Animation not found for {material_name}'}), 404
+            
+    except Exception as e:
+        print(f"Error in animation retrieval: {e}")
         print(traceback.format_exc())
         return jsonify({'error': f'An internal error occurred: {str(e)}'}), 500
 

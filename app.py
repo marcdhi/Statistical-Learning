@@ -6,6 +6,12 @@ import plotly.io as pio
 import plotly
 import json
 import traceback
+import numpy as np 
+import joblib 
+from rocket import RocketPredictor
+from thresholds import thres
+import pandas as pd
+
 
 # --- Configuration ---
 # Professional color scheme
@@ -19,13 +25,34 @@ GRID_COLOR = "#e2e8f0"  # Light gray
 # --- Initialize Flask App ---
 app = Flask(__name__)
 
+def ml_process(path):
+    
+    X_list = []
+    df = pd.read_csv(path)
+    X_series = df['Amplitude - Acceleration (FFT - (Peak))'].to_numpy()
+    time_steps = 30  # Example fixed length
+    if len(X_series) < time_steps:
+        X_series = np.pad(X_series, (0, time_steps - len(X_series)), mode='constant')
+    else:
+        X_series = X_series[:time_steps]  # Truncate if too long
+    X_list.append(X_series)  
+    X = np.array(X_list)
+    X = X.reshape(1,-1)
+
+    viscosity_model = joblib.load('models/rocket_predictor_modelv.joblib')
+    density_model = joblib.load('models/rocket_predictor_modeld.joblib')
+        
+    y_preds = np.maximum(thres, viscosity_model.predict(X))
+    de = density_model.predict(X)
+    return y_preds[0], de[0]
+
 # --- Dummy ML Function (enhanced with more realistic values) ---
 def ml_model(path):
     """Simulates ML model prediction based on path."""
     path_data = {
-        "Path A": (2.71, 0.89),  # Standard material
-        "Path B": (1.58, 1.22),  # Light material
-        "Path C": (3.14, 0.72),  # Dense material
+        "Amla Oil": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Amla_Oil.csv"),  # Standard material
+        "Ghee": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Ghee.csv"),  # Light material
+        "Pepsi": ml_process(r"C:\Users\hrida\Statistical-Learning\tests\Pepsi.csv"),  # Dense material
     }
     return path_data.get(path, (0.0, 0.0))
 
@@ -169,7 +196,7 @@ def index():
     try:
         print("Rendering index page")
         initial_plot_json = generate_plot_json()
-        paths = ["Path A", "Path B", "Path C"]
+        paths = ["Pepsi", "Amla Oil", "Ghee"]
         return render_template('index.html',
                               paths=paths,
                               initial_plot_json=initial_plot_json)

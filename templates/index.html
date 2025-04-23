@@ -375,57 +375,16 @@
             densityOutput.innerHTML = loadingHTML;
             viscosityOutput.innerHTML = loadingHTML;
             
-            // Also load the animation automatically
+            // Show loading indicator for animation (just the indicator, not fetching yet)
             if (selectedPath && selectedPath !== "Choose a path...") {
-                // Show loading indicator for animation
                 animationContainer.innerHTML = `
                     <div class="text-center">
                         <div class="spinner-border text-primary mb-3" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <p>Loading animation for ${selectedPath}...</p>
+                        <p>Loading analysis results...</p>
                     </div>
                 `;
-                
-                // Request the animation
-                fetch('/generate_animation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ material: selectedPath }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.error || 'Failed to generate animation');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success && data.animation_path) {
-                        // Add timestamp to prevent caching
-                        const timestamp = new Date().getTime();
-                        const animationPath = `${data.animation_path}?t=${timestamp}`;
-                        
-                        // Display the animation
-                        animationContainer.innerHTML = `
-                            <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
-                        `;
-                    } else {
-                        throw new Error('Animation generation failed');
-                    }
-                })
-                .catch(error => {
-                    console.error('Animation Error:', error);
-                    animationContainer.innerHTML = `
-                        <div class="text-center text-danger">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                            <p>${error.message}</p>
-                        </div>
-                    `;
-                });
             }
 
             console.log("Sending request to /predict endpoint");
@@ -459,6 +418,59 @@
                     viscosityOutput.innerHTML = errorHTML;
                 } else {
                     updateResults(data);
+                    
+                    // Now fetch the animation after density/viscosity data is loaded
+                    if (selectedPath && selectedPath !== "Choose a path...") {
+                        // Update loading message for animation
+                        animationContainer.innerHTML = `
+                            <div class="text-center">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p>Loading animation for ${selectedPath}...</p>
+                            </div>
+                        `;
+                        
+                        // Request the animation
+                        fetch('/generate_animation', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ material: selectedPath }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw new Error(data.error || 'Failed to generate animation');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success && data.animation_path) {
+                                // Add timestamp to prevent caching
+                                const timestamp = new Date().getTime();
+                                const animationPath = `${data.animation_path}?t=${timestamp}`;
+                                
+                                // Display the animation
+                                animationContainer.innerHTML = `
+                                    <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
+                                `;
+                            } else {
+                                throw new Error('Animation generation failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Animation Error:', error);
+                            animationContainer.innerHTML = `
+                                <div class="text-center text-danger">
+                                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                                    <p>${error.message}</p>
+                                </div>
+                            `;
+                        });
+                    }
                 }
             })
             .catch(error => {

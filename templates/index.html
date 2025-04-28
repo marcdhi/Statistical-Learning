@@ -614,6 +614,9 @@
                         <button class="tab-btn" data-tab="calculator-tab">
                             <i class="fas fa-calculator me-2"></i>Natural Frequency Calculator
                         </button>
+                        <button class="tab-btn" data-tab="viscosity-tab">
+                            <i class="fas fa-tint me-2"></i>Viscosity Analysis
+                        </button>
                     </div>
                     
                     <!-- Dashboard Tab -->
@@ -883,6 +886,118 @@
                 </div>
             </div>
             
+            <!-- New Viscosity Analysis Tab -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-tint me-2"></i>Viscosity Analysis
+                </div>
+                <div class="card-body p-0">
+                    <div id="viscosity-tab" class="tab-content p-4">
+                        <div class="row g-4">
+                            <!-- Density Input -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-weight-hanging me-2"></i>Density
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="densityInput">Density (ρ)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="densityInput"
+                                                value="1000.0"
+                                                min="500"
+                                                max="2000"
+                                                step="0.1"
+                                            />
+                                            <span class="input-group-text">kg/m³</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 500-2000 kg/m³</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Viscosity Input -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-tint me-2"></i>Viscosity
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="viscosityInput">Viscosity (μ)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="viscosityInput"
+                                                value="10.0"
+                                                min="0.1"
+                                                max="1000"
+                                                step="0.1"
+                                            />
+                                            <span class="input-group-text">mPa·s</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 0.1-1000 mPa·s</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center my-4">
+                            <button id="analyzeViscosityBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-microscope me-2"></i>Analyze Fluid Properties
+                            </button>
+                        </div>
+
+                        <!-- Results -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-line me-2"></i>Damping Ratio
+                                    </div>
+                                    <div class="card-body text-center py-4">
+                                        <div class="display-4" id="dampingRatio">--</div>
+                                        <span class="text-muted">ζ</span>
+                                        <div class="text-muted small mt-3 text-start">
+                                            <strong>Damping Type:</strong> <span id="viscDampingType">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-info-circle me-2"></i>Analysis Results
+                                    </div>
+                                    <div class="card-body py-4">
+                                        <div id="analysisStatus" class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Enter fluid properties and click analyze to see results.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fluid Response Graph -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-area me-2"></i>Fluid Response Graph
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="fluidResponseChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Footer -->
             <footer class="text-center py-4 mt-4 text-muted">
                 <small>© 2025 Statistical Learning Lab. All rights reserved.</small>
@@ -933,6 +1048,14 @@
                         }
                         calculate();
                     }, 300); // Increased timeout to ensure DOM is ready
+                }
+                
+                // Initialize fluid response chart if viscosity tab is shown
+                if (tabId === 'viscosity-tab') {
+                    // Ensure chart is initialized and visible after tab is shown
+                    setTimeout(() => {
+                        initFluidResponseChart();
+                    }, 300);
                 }
             });
         });
@@ -1569,6 +1692,184 @@
             if (chartContainer) {
                 chartContainer.style.display = 'block';
                 chartContainer.style.visibility = 'visible';
+            }
+        });
+    </script>
+    
+    <!-- Fluid Analysis Script -->
+    <script>
+        let fluidResponseChart = null;
+        
+        // Function to initialize the fluid response chart with dummy data
+        function initFluidResponseChart() {
+            try {
+                console.log("Initializing fluid response chart...");
+                const chartCanvas = document.getElementById('fluidResponseChart');
+                
+                // Check if the canvas element exists
+                if (!chartCanvas) {
+                    console.error("Fluid response chart canvas element not found!");
+                    return;
+                }
+                
+                // If chart already exists, destroy it to prevent duplicates
+                if (fluidResponseChart) {
+                    fluidResponseChart.destroy();
+                    fluidResponseChart = null;
+                }
+                
+                // Generate dummy data for the chart
+                const labels = [];
+                const data = [];
+                const timeStep = 0.1;
+                const maxTime = 20;
+                
+                // Simple dummy oscillation that decays (just for UI demonstration)
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    labels.push(t.toFixed(1));
+                    // Dummy formula to show a decaying oscillation
+                    const amplitude = Math.exp(-0.2 * t) * Math.cos(2 * t);
+                    data.push(amplitude);
+                }
+                
+                // Create the chart
+                const ctx = chartCanvas.getContext('2d');
+                fluidResponseChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Fluid Response',
+                            data: data,
+                            borderColor: 'rgb(75, 150, 192)',
+                            backgroundColor: 'rgba(75, 150, 192, 0.1)',
+                            tension: 0.2,
+                            fill: true,
+                            pointRadius: 0,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time (s)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Amplitude'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log("Fluid response chart initialized successfully!");
+            } catch (error) {
+                console.error("Error initializing fluid response chart:", error);
+            }
+        }
+        
+        // Function to analyze fluid properties (dummy for now)
+        function analyzeFluidProperties() {
+            try {
+                // Get values from inputs
+                const density = parseFloat(document.getElementById('densityInput').value);
+                const viscosity = parseFloat(document.getElementById('viscosityInput').value);
+                
+                // For demonstration, calculate a dummy damping ratio based on the inputs
+                // This would be replaced by actual backend calculation later
+                const dummyDampingRatio = (viscosity / density) * 0.05;
+                
+                // Update the damping ratio display
+                document.getElementById('dampingRatio').innerText = dummyDampingRatio.toFixed(4);
+                
+                // Determine damping type
+                let dampingType = "";
+                if (dummyDampingRatio < 0.7) {
+                    dampingType = "Underdamped";
+                } else if (dummyDampingRatio < 1.2) {
+                    dampingType = "Near Critical";
+                } else {
+                    dampingType = "Overdamped";
+                }
+                
+                // Update damping type display
+                document.getElementById('viscDampingType').textContent = dampingType;
+                
+                // Update analysis status
+                document.getElementById('analysisStatus').innerHTML = `
+                    <i class="fas fa-check-circle me-2 text-success"></i>
+                    <strong>Analysis complete!</strong> Results reflect fluid properties with density ${density} kg/m³ and viscosity ${viscosity} mPa·s.
+                `;
+                document.getElementById('analysisStatus').classList.remove('alert-info');
+                document.getElementById('analysisStatus').classList.add('alert-success');
+                
+                // Update the chart with new "data"
+                updateFluidResponseChart(dummyDampingRatio);
+                
+            } catch (error) {
+                console.error("Error analyzing fluid properties:", error);
+                document.getElementById('analysisStatus').innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                    <strong>Error:</strong> Failed to analyze fluid properties. Please check your inputs.
+                `;
+                document.getElementById('analysisStatus').classList.remove('alert-info');
+                document.getElementById('analysisStatus').classList.add('alert-danger');
+            }
+        }
+        
+        // Function to update the fluid response chart based on damping ratio
+        function updateFluidResponseChart(dampingRatio) {
+            try {
+                // If chart doesn't exist, initialize it
+                if (!fluidResponseChart) {
+                    initFluidResponseChart();
+                    return;
+                }
+                
+                // Generate new data based on the damping ratio
+                const data = [];
+                const timeStep = 0.1;
+                const maxTime = 20;
+                
+                // Create "damped" data that reflects the damping ratio (simplified for UI demonstration)
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    // Adjust frequency and decay rate based on damping ratio
+                    const decayRate = dampingRatio * 0.8;
+                    const frequency = 2 * (1 - Math.min(dampingRatio, 0.9) * 0.5);
+                    const amplitude = Math.exp(-decayRate * t) * Math.cos(frequency * t);
+                    data.push(amplitude);
+                }
+                
+                // Update chart data
+                fluidResponseChart.data.datasets[0].data = data;
+                fluidResponseChart.update();
+                console.log("Fluid response chart updated with damping ratio:", dampingRatio);
+                
+            } catch (error) {
+                console.error("Error updating fluid response chart:", error);
+            }
+        }
+        
+        // Add event listener for analyze button
+        document.addEventListener('DOMContentLoaded', function() {
+            const analyzeViscosityBtn = document.getElementById('analyzeViscosityBtn');
+            if (analyzeViscosityBtn) {
+                analyzeViscosityBtn.addEventListener('click', analyzeFluidProperties);
+            }
+            
+            // Initialize chart if viscosity tab is active on page load
+            if (document.getElementById('viscosity-tab').classList.contains('active')) {
+                setTimeout(initFluidResponseChart, 300);
             }
         });
     </script>

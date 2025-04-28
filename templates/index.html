@@ -14,77 +14,195 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <!-- MathJax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <style>
-        /* Enhanced custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            padding-top: 80px;
-            color: #2c3e50;
+        /* Enhanced Professional UI Styles */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #6366f1;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
         }
         
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+        
+        /* Navbar styles */
         .navbar {
-            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%) !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 1rem 0;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%) !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 0.75rem 0;
+            z-index: 1030;
         }
 
         .navbar-brand {
             font-weight: 600;
             font-size: 1.4rem;
             color: white !important;
+            letter-spacing: -0.025em;
         }
 
         .nav-link {
-            color: rgba(255,255,255,0.9) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
             font-weight: 500;
+            transition: all 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
         }
-
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 80px 0 0;
+            width: 260px;
+            z-index: 100;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            background: white;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding-top: 80px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-heading {
+            padding: 1rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .material-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .material-item {
+            padding: 0.625rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .material-item:hover {
+            background-color: var(--gray-100);
+        }
+        
+        .material-item.active {
+            background-color: var(--gray-100);
+            border-left: 3px solid var(--primary);
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        /* Color indicators for materials */
+        .color-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Page header */
         .page-header {
             text-align: center;
-            margin-bottom: 2.5rem;
-            padding: 2rem 0;
+            margin-bottom: 2rem;
+            padding: 1.5rem 0;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .page-header h1 {
             font-weight: 700;
-            color: #1a365d;
-            font-size: 2.2rem;
-            margin-bottom: 1rem;
+            color: var(--gray-900);
+            font-size: 1.875rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
         }
 
         .page-header p {
-            color: #718096;
+            color: var(--gray-500);
             font-size: 1.1rem;
             max-width: 800px;
             margin: 0 auto;
         }
 
+        /* Card styles */
         .card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
             background: white;
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
+            overflow: hidden;
         }
 
         .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transform: translateY(-2px);
         }
 
         .card-header {
             background-color: white;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--gray-200);
             padding: 1rem 1.5rem;
             font-weight: 600;
-            color: #2d3748;
-            font-size: 1.1rem;
+            color: var(--gray-800);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header i {
+            color: var(--primary);
+            margin-right: 0.5rem;
         }
 
+        .card-body {
+            padding: 1.5rem;
+        }
+        
         .output-card {
             min-height: 120px;
             display: flex;
@@ -93,59 +211,160 @@
             text-align: center;
             font-size: 1.2em;
             font-weight: 500;
-            color: #2d3748;
-            padding: 1.5rem;
+            color: var(--gray-800);
         }
 
-        .form-select, .btn {
-            border-radius: 8px;
-            font-size: 1rem;
+        /* Form elements */
+        .form-select, .form-control {
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            border-color: var(--gray-300);
+            padding: 0.625rem;
+            transition: all 0.2s;
         }
-
-        .form-select {
-            border-color: #e2e8f0;
-            padding: 0.75rem;
+        
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .input-group-text {
+            border-radius: 0 0.375rem 0.375rem 0;
+            background-color: var(--gray-100);
+            border-color: var(--gray-300);
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Button styles */
+        .btn {
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            transition: all 0.2s ease;
+            letter-spacing: 0.01em;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-            border: none;
-            padding: 0.75rem 2rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover, .btn-primary:focus {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(45, 55, 72, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-
-        #plot-area {
-            min-height: 450px;
-            padding: 1rem;
+        
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
         }
-
+        
+        .btn-success:hover, .btn-success:focus {
+            background-color: #0ea271;
+            border-color: #0ea271;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        /* Value displays */
         .value-label {
-            font-size: 0.9rem;
-            color: #718096;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
         }
 
         .value-number {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2d3748;
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            line-height: 1.2;
+            letter-spacing: -0.025em;
         }
 
         .value-unit {
-            font-size: 1rem;
-            color: #718096;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
         }
         
+        /* Logo styles */
         .nitk-logo {
-            height: 40px;
-            margin-right: 15px;
+            height: 36px;
+            margin-right: 12px;
+            border-radius: 4px;
             background-color: white;
+            padding: 2px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Tab navigation */
+        .tabs-container {
+            margin-bottom: 1.5rem;
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .tab-btn {
+            border: none;
+            background-color: transparent;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            margin-right: 0.5rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            top: 1px;
+        }
+        
+        .tab-btn:hover {
+            color: var(--gray-700);
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block !important;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Plot and visualization containers */
+        .plot-container {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            display: block;
         }
         
         #animation-container {
@@ -154,41 +373,166 @@
             align-items: center;
             min-height: 300px;
             padding: 1rem;
+            background-color: var(--gray-50);
+            border-radius: 0.375rem;
         }
         
         .animation-gif {
             max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
         }
         
-        .tabs-container {
+        /* Alert styles */
+        .alert {
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-size: 0.875rem;
+            border: none;
+        }
+        
+        .alert-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+        }
+        
+        /* Natural Frequency Calculator styles */
+        .input-group input[type="number"] {
+            text-align: right;
+            font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .display-4 {
+            font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+            font-weight: 700;
+            font-size: 2.25rem;
+            letter-spacing: -0.05em;
+            color: var(--gray-900);
+            line-height: 1.2;
+        }
+        
+        /* Chart and visualization containers */
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            display: block !important;
+            visibility: visible !important;
             margin-bottom: 1rem;
         }
         
-        .tab-btn {
-            border: none;
-            background-color: #f1f5f9;
-            padding: 10px 20px;
-            border-radius: 8px 8px 0 0;
-            font-weight: 500;
-            color: #718096;
-            margin-right: 5px;
-            border-bottom: 3px solid transparent;
+        #graph.active, #animation-calc.active {
+            display: block !important;
         }
         
-        .tab-btn.active {
-            color: #1a365d;
-            background-color: white;
-            border-bottom: 3px solid #1a365d;
+        .tab-content .tab-pane.active {
+            display: block !important;
+            
         }
         
-        .tab-content {
-            display: none;
+        #oscillationChart {
+            width: 100% !important;
+            height: 100% !important;
         }
         
-        .tab-content.active {
+        #animationCanvas {
+            width: 100%;
+            height: 400px;
             display: block;
+        }
+        
+        #calculatorAnimationContainer {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            display: block;
+        }
+        
+        /* Force visibility for nested tabs */
+        .nested-tabs .tab-content .tab-pane.active {
+            opacity: 1;
+            visibility: visible;
+            height: auto;
+            overflow: visible;
+        }
+        
+        /* Bootstrap Tabs Override */
+        .nav-tabs {
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--gray-600);
+            border: none;
+            padding: 0.75rem 1.25rem;
+            margin-right: 0.25rem;
+            border-radius: 0.375rem 0.375rem 0 0;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: var(--gray-100);
+            color: var(--gray-700);
+            border-color: transparent;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            background-color: white;
+            border-top: 2px solid var(--primary);
+            border-left: 1px solid var(--gray-200);
+            border-right: 1px solid var(--gray-200);
+            border-bottom: none;
+        }
+        
+        .tab-pane {
+            padding: 1rem 0;
+        }
+        
+        /* Animation container style */
+        #calculatorAnimationContainer {
+            position: relative;
+            width: 600px;
+            max-width: 100%;
+            height: 200px;
+            background-color: var(--gray-50);
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: block;
+            overflow: hidden;
+        }
+        
+        /* Responsive design for sidebar */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding-top: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-top: 20px;
+            }
+            
+            body {
+                padding-top: 60px;
+            }
+        }
+
+        /* Add specific style for graph pane */
+        #graph.active {
+            display: block !important;
+        }
+
+        /* Add specific style for animation pane */
+        #animation-calc.active {
+            display: block !important;
         }
     </style>
 </head>
@@ -196,125 +540,374 @@
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-      <div class="container">
+      <div class="container-fluid">
         <a class="navbar-brand" href="#">
             <img src="{{ url_for('static', filename='images/NITK.png') }}" alt="NITK Logo" class="nitk-logo">
-            Statistical Learning Lab
+            <span>Statistical Learning Lab</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
+            <!-- You could add more navigation items here if needed -->
           </ul>
         </div>
       </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>Statistical Learning Based Inverse Modelling</h1>
-            <p>Advanced physical system analysis through machine learning and statistical inference</p>
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-lg-block">
+        <div class="sidebar-heading">
+            <i class="fas fa-flask me-2"></i>Material Selection
         </div>
+        <ul class="material-list" id="material-list">
+            {% for path in paths %}
+            <li class="material-item" data-material="{{ path }}">
+                {% if colors and colors|length > 0 %}
+                <span class="color-indicator" style="background-color: {{ colors[loop.index0 % colors|length] }};"></span>
+                {% else %}
+                <span class="color-indicator" style="background-color: #4299e1;"></span>
+                {% endif %}
+                <span>{{ path }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-        <!-- Input Section -->
+    <!-- Mobile Material Selector (only visible on small screens) -->
+    <div class="container d-block d-lg-none mt-3">
         <div class="card">
             <div class="card-header">
-                <i class="fas fa-sliders-h me-2"></i>Model Parameters
+                <i class="fas fa-flask me-2"></i>Material Selection
             </div>
             <div class="card-body">
-                <form id="prediction-form" class="py-2">
-                    <div class="row g-4 align-items-center">
-                        <div class="col-md-4">
-                            <label for="path-select" class="form-label">Select the FFT</label>
-                            <select class="form-select" id="path-select" name="path">
-                                <option selected>Choose a path...</option>
-                                {% for path in paths %}
-                                <option value="{{ path }}">{{ path }}</option>
-                                {% endfor %}
-                            </select>
+                <select class="form-select" id="mobile-material-select">
+                    <option selected>Choose a material...</option>
+                    {% for path in paths %}
+                    <option value="{{ path }}">{{ path }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Statistical Learning Based Inverse Modelling</h1>
+                <p>Advanced physical system analysis through machine learning and statistical inference</p>
+            </div>
+
+            <!-- Dashboard Tabs -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-2"></i>Analysis Dashboard
+                </div>
+                <div class="card-body p-0">
+                    <div class="tabs-container">
+                        <button class="tab-btn active" data-tab="dashboard-tab">
+                            <i class="fas fa-chart-bar me-2"></i>Material Analysis
+                        </button>
+                        <button class="tab-btn" data-tab="calculator-tab">
+                            <i class="fas fa-calculator me-2"></i>Natural Frequency Calculator
+                        </button>
+                    </div>
+                    
+                    <!-- Dashboard Tab -->
+                    <div id="dashboard-tab" class="tab-content active p-4">
+                        <!-- Material info section -->
+                        <div class="row" id="material-info">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body output-card" id="density-output">
+                                        <div>
+                                            <div class="value-label">Density</div>
+                                            <div class="value-number">--</div>
+                                            <div class="value-unit">kg/m³</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body output-card" id="viscosity-output">
+                                        <div>
+                                            <div class="value-label">Viscosity</div>
+                                            <div class="value-number">--</div>
+                                            <div class="value-unit">mPa·s</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-play me-2"></i>Run Analysis
+
+                        <!-- Comparison Plots -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-2"></i>Response Comparison
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info" id="plot-instruction">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Select a material from the sidebar to view the comparison plots.
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="plot-container" id="comparison-plot">
+                                            <!-- Plot will be rendered here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Experimental Response</h5>
+                                                <div class="text-muted small">
+                                                    Logarithmic Decrement (δ): <span id="exp-decrement" class="fw-bold">--</span>
+                                                </div>
+                                                <div class="text-muted small mt-2">
+                                                    Damping Ratio (ζ): <span id="exp-damping" class="fw-bold">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Theoretical Response</h5>
+                                                <div class="text-muted small">
+                                                    Logarithmic Decrement (δ): <span id="theo-decrement" class="fw-bold">--</span>
+                                                </div>
+                                                <div class="text-muted small mt-2">
+                                                    Damping Ratio (ζ): <span id="theo-damping" class="fw-bold">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calculator Tab -->
+                    <div id="calculator-tab" class="tab-content p-4">
+                        <div class="row g-4">
+                            <!-- Input Section -->
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-weight me-2"></i>Mass
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="massInput">Mass (m)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="massInput"
+                                                value="2.0000"
+                                                min="0.0001"
+                                                max="50"
+                                                step="0.0001"
+                                            />
+                                            <span class="input-group-text">kg</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 0.0001-50 kg</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-compress-alt me-2"></i>Stiffness
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="stiffnessInput">Stiffness (k)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="stiffnessInput"
+                                                value="5000.00"
+                                                min="100"
+                                                max="100000"
+                                                step="0.01"
+                                            />
+                                            <span class="input-group-text">N/m</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 100-100,000 N/m</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-tint me-2"></i>Damping
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="dampingInput">Damping (c)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="dampingInput"
+                                                value="20.000"
+                                                min="0"
+                                                max="500"
+                                                step="0.001"
+                                            />
+                                            <span class="input-group-text">N·s/m</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 0-500 N·s/m</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        <i class="fas fa-wave-square me-2"></i>Initial Displacement
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label" for="initialDisplacement">Initial Displacement (x₀)</label>
+                                        <div class="input-group">
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                id="initialDisplacement"
+                                                value="1.0"
+                                                min="0"
+                                                step="0.1"
+                                            />
+                                            <span class="input-group-text">m</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Range: 0-10 m</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class="text-center my-4">
+                            <button id="calculateBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-calculator me-2"></i>Calculate Frequencies
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Output Section -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body output-card" id="density-output">
-                        <div>
-                            <div class="value-label">Density</div>
-                            <div class="value-number">--</div>
-                            <div class="value-unit">kg/m³</div>
+                        <!-- Results -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-wave-square me-2"></i>Undamped Natural Frequency
+                                    </div>
+                                    <div class="card-body text-center py-4">
+                                        <div class="display-4" id="undampedFreq">--</div>
+                                        <span class="text-muted">Hz</span>
+                                        <div class="text-muted small mt-3 text-start">
+                                            <strong>Formula:</strong><br />
+                                            \( f_n = \frac{1}{2\pi} \sqrt{\frac{k}{m}} \)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-wave-square me-2"></i>Damped Natural Frequency
+                                    </div>
+                                    <div class="card-body text-center py-4">
+                                        <div class="display-4" id="dampedFreq">--</div>
+                                        <span class="text-muted">Hz</span>
+                                        <div class="text-muted small mt-3 text-start">
+                                            <strong>Formula:</strong><br />
+                                            \( f_d = \frac{1}{2\pi} \sqrt{\frac{k}{m} -
+                                            \left(\frac{c}{2m}\right)^2} \)
+                                        </div>
+                                        <div id="dampingStatus" class="small mt-3 text-start"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visualization Tabs -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line me-2"></i>Visualization
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-tabs" id="visualizationTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="graph-tab" data-bs-toggle="tab" data-bs-target="#graph" type="button" role="tab" aria-controls="graph" aria-selected="true">
+                                            <i class="fas fa-chart-line me-2"></i>Damped Oscillation Graph
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="animation-tab-calc" data-bs-toggle="tab" data-bs-target="#animation-calc" type="button" role="tab" aria-controls="animation-calc" aria-selected="false">
+                                            <i class="fas fa-film me-2"></i>Animation
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content p-3 border border-top-0 rounded-bottom" id="visualizationTabsContent">
+                                    <div class="tab-pane fade show active" id="graph" role="tabpanel" aria-labelledby="graph-tab">
+                                        <div class="chart-container">
+                                            <canvas id="oscillationChart"></canvas>
+                                        </div>
+                                        <div class="alert alert-info" id="logDecrementInfo">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Logarithmic decrement (δ): <span id="logDecrement" class="fw-bold">--</span>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="animation-calc" role="tabpanel" aria-labelledby="animation-tab-calc">
+                                        <div class="d-flex justify-content-center align-items-center py-4">
+                                            <div class="text-center">
+                                                <div id="calculatorAnimationContainer">
+                                                    <canvas id="animationCanvas" width="600" height="200"></canvas>
+                                                </div>
+                                                <button id="playAnimationBtn" class="btn btn-success mt-3">
+                                                    <i class="fas fa-play me-2"></i>Play Animation
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body output-card" id="viscosity-output">
-                        <div>
-                            <div class="value-label">Viscosity</div>
-                            <div class="value-number">--</div>
-                            <div class="value-unit">mPa·s</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
+            <!-- Footer -->
+            <footer class="text-center py-4 mt-4 text-muted">
+                <small>© 2025 Statistical Learning Lab. All rights reserved.</small>
+            </footer>
         </div>
-
-        <!-- Visualization Tabs -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-chart-line me-2"></i>Analysis Visualization
-            </div>
-            <div class="card-body">
-                <div class="tabs-container">
-                    <button class="tab-btn active" data-tab="animation-tab">Dynamic Animation</button>
-                </div>
-                
-                <div id="animation-tab" class="tab-content active">
-                    <div id="animation-container">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-film fa-3x mb-3"></i>
-                            <p>Select a material and click "Run Analysis" to visualize the damped response.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Simple test plot script -->
-    <script src="{{ url_for('static', filename='js/simple-plot.js') }}"></script>
-
     <!-- Custom JavaScript -->
     <script>
-        const form = document.getElementById('prediction-form');
-        const pathSelect = document.getElementById('path-select');
-        const densityOutput = document.getElementById('density-output');
-        const viscosityOutput = document.getElementById('viscosity-output');
-        const animationContainer = document.getElementById('animation-container');
+        // Define material colors for consistent visualization
+        const materialColors = {
+            primary: '#1a365d',     // Dark blue for theoretical
+            secondary: '#4299e1',   // Light blue for experimental
+            background: '#ffffff',  // White
+            textColor: '#2d3748',   // Dark gray
+            gridColor: '#e2e8f0'    // Light gray
+        };
+
+        // Dashboard tab switching functionality
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        // Add debug logging
-        console.log("Main script initialized");
-        
-        // Tab switching functionality
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.getAttribute('data-tab');
@@ -326,41 +919,45 @@
                 // Add active class to current button and tab
                 btn.classList.add('active');
                 document.getElementById(tabId).classList.add('active');
+
+                // Initialize chart if calculator tab is shown
+                if (tabId === 'calculator-tab') {
+                    // Ensure chart is initialized and visible after tab is shown
+                    setTimeout(() => {
+                        if (!oscillationChart) {
+                            console.log("Initializing chart after tab switch");
+                            initChart();
+                        } else {
+                            console.log("Resizing existing chart");
+                            oscillationChart.resize();
+                        }
+                        calculate();
+                    }, 300); // Increased timeout to ensure DOM is ready
+                }
             });
         });
+
+        // Material selection from sidebar
+        const materialItems = document.querySelectorAll('.material-item');
+        const mobileMaterialSelect = document.getElementById('mobile-material-select');
         
-        function updateResults(data) {
-            console.log("Updating results with data:", data);
+        // Function to select a material and update UI
+        function selectMaterial(materialName) {
+            // Update active state in sidebar
+            materialItems.forEach(item => {
+                if (item.getAttribute('data-material') === materialName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
             
-            // Parse the values from the strings
-            const densityMatch = data.density.match(/(\d+\.\d+)/);
-            const viscosityMatch = data.viscosity.match(/(\d+\.\d+)/);
+            // Update mobile dropdown if it exists
+            if (mobileMaterialSelect) {
+                mobileMaterialSelect.value = materialName;
+            }
             
-            densityOutput.innerHTML = `
-                <div>
-                    <div class="value-label">Density</div>
-                    <div class="value-number">${densityMatch ? densityMatch[1] : '--'}</div>
-                    <div class="value-unit">kg/m³</div>
-                </div>
-            `;
-            
-            viscosityOutput.innerHTML = `
-                <div>
-                    <div class="value-label">Viscosity</div>
-                    <div class="value-number">${viscosityMatch ? viscosityMatch[1] : '--'}</div>
-                    <div class="value-unit">mPa·s</div>
-                </div>
-            `;
-        }
-
-        // Handle Form Submission
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            console.log("Form submitted");
-
-            const selectedPath = pathSelect.value;
-            console.log("Selected path:", selectedPath);
-            
+            // Show loading indicators
             const loadingHTML = `
                 <div>
                     <div class="value-label">Calculating</div>
@@ -371,29 +968,42 @@
                     </div>
                 </div>
             `;
-
-            densityOutput.innerHTML = loadingHTML;
-            viscosityOutput.innerHTML = loadingHTML;
             
-            // Show loading indicator for animation (just the indicator, not fetching yet)
-            if (selectedPath && selectedPath !== "Choose a path...") {
-                animationContainer.innerHTML = `
-                    <div class="text-center">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p>Loading analysis results...</p>
-                    </div>
-                `;
-            }
-
-            console.log("Sending request to /predict endpoint");
+            document.getElementById('density-output').innerHTML = loadingHTML;
+            document.getElementById('viscosity-output').innerHTML = loadingHTML;
+            
+            // Fetch material data and update dashboard
+            fetchMaterialData(materialName);
+        }
+        
+        // Event listeners for material selection
+        materialItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const materialName = item.getAttribute('data-material');
+                selectMaterial(materialName);
+            });
+        });
+        
+        // Mobile dropdown change handler
+        if (mobileMaterialSelect) {
+            mobileMaterialSelect.addEventListener('change', () => {
+                const materialName = mobileMaterialSelect.value;
+                if (materialName !== 'Choose a material...') {
+                    selectMaterial(materialName);
+                }
+            });
+        }
+        
+        // Function to fetch material data from server
+        function fetchMaterialData(materialName) {
+            console.log("Fetching data for:", materialName);
+            
             fetch('/predict', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ path: selectedPath }),
+                body: JSON.stringify({ path: materialName }),
             })
             .then(response => {
                 console.log("Response received:", response);
@@ -406,88 +1016,561 @@
                 console.log("Data received:", data);
                 if (data.error) {
                     console.error('Server Error:', data.error);
-                    const errorHTML = `
-                        <div>
-                            <div class="value-label">Error</div>
-                            <div class="value-number text-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                            </div>
-                        </div>
-                    `;
-                    densityOutput.innerHTML = errorHTML;
-                    viscosityOutput.innerHTML = errorHTML;
+                    showError();
                 } else {
-                    updateResults(data);
-                    
-                    // Now fetch the animation after density/viscosity data is loaded
-                    if (selectedPath && selectedPath !== "Choose a path...") {
-                        // Update loading message for animation
-                        animationContainer.innerHTML = `
-                            <div class="text-center">
-                                <div class="spinner-border text-primary mb-3" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p>Loading animation for ${selectedPath}...</p>
-                            </div>
-                        `;
-                        
-                        // Request the animation
-                        fetch('/generate_animation', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ material: selectedPath }),
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                return response.json().then(data => {
-                                    throw new Error(data.error || 'Failed to generate animation');
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success && data.animation_path) {
-                                // Add timestamp to prevent caching
-                                const timestamp = new Date().getTime();
-                                const animationPath = `${data.animation_path}?t=${timestamp}`;
-                                
-                                // Display the animation
-                                animationContainer.innerHTML = `
-                                    <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
-                                `;
-                            } else {
-                                throw new Error('Animation generation failed');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Animation Error:', error);
-                            animationContainer.innerHTML = `
-                                <div class="text-center text-danger">
-                                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                                    <p>${error.message}</p>
-                                </div>
-                            `;
-                        });
-                    }
+                    updateDashboard(data, materialName);
                 }
             })
             .catch(error => {
                 console.error('Fetch Error:', error);
-                const networkErrorHTML = `
-                    <div>
-                        <div class="value-label">Network Error</div>
-                        <div class="value-number text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                    </div>
-                `;
-                densityOutput.innerHTML = networkErrorHTML;
-                viscosityOutput.innerHTML = networkErrorHTML;
+                showError();
             });
+        }
+        
+        // Function to update the dashboard with material data
+        function updateDashboard(data, materialName) {
+            // Update density and viscosity cards
+            const densityMatch = data.density.match(/(\d+\.\d+)/);
+            const viscosityMatch = data.viscosity.match(/(\d+\.\d+)/);
+            
+            document.getElementById('density-output').innerHTML = `
+                <div>
+                    <div class="value-label">Density</div>
+                    <div class="value-number">${densityMatch ? densityMatch[1] : '--'}</div>
+                    <div class="value-unit">kg/m³</div>
+                </div>
+            `;
+            
+            document.getElementById('viscosity-output').innerHTML = `
+                <div>
+                    <div class="value-label">Viscosity</div>
+                    <div class="value-number">${viscosityMatch ? viscosityMatch[1] : '--'}</div>
+                    <div class="value-unit">mPa·s</div>
+                </div>
+            `;
+            
+            // Request response data for comparison plot
+            fetch('/get_response_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ material: materialName }),
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                if (responseData.success) {
+                    // Update damping values
+                    document.getElementById('exp-damping').textContent = responseData.experimental_zeta.toFixed(5);
+                    document.getElementById('theo-damping').textContent = responseData.theoretical_zeta.toFixed(5);
+                    
+                    // Update log decrement values
+                    document.getElementById('exp-decrement').textContent = responseData.experimental_delta.toFixed(5);
+                    document.getElementById('theo-decrement').textContent = responseData.theoretical_delta.toFixed(5);
+                    
+                    // Create comparison plot
+                    createComparisonPlot(responseData, materialName);
+                } else {
+                    document.getElementById('plot-instruction').innerHTML = `
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error: ${responseData.error || 'Failed to load response data'}
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching response data:', error);
+                document.getElementById('plot-instruction').innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error: Failed to load response data
+                `;
+            });
+        }
+        
+        // Function to create the comparison plot
+        function createComparisonPlot(data, materialName) {
+            const plotElement = document.getElementById('comparison-plot');
+            
+            // Hide the instruction message
+            document.getElementById('plot-instruction').style.display = 'none';
+            
+            // Create the plot
+            const traces = [
+                {
+                    x: data.time,
+                    y: data.experimental_response,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Experimental',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 2.5
+                    }
+                },
+                {
+                    x: data.time,
+                    y: data.theoretical_response,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theoretical',
+                    line: {
+                        color: materialColors.primary,
+                        width: 3
+                    }
+                }
+            ];
+            
+            // Add envelope traces
+            if (data.exp_envelope_upper && data.exp_envelope_lower) {
+                traces.push({
+                    x: data.time,
+                    y: data.exp_envelope_upper,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Exp Envelope',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+                
+                traces.push({
+                    x: data.time,
+                    y: data.exp_envelope_lower,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Exp Envelope',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+            }
+            
+            if (data.theo_envelope_upper && data.theo_envelope_lower) {
+                traces.push({
+                    x: data.time,
+                    y: data.theo_envelope_upper,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theo Envelope',
+                    line: {
+                        color: materialColors.primary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+                
+                traces.push({
+                    x: data.time,
+                    y: data.theo_envelope_lower,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theo Envelope',
+                    line: {
+                        color: materialColors.primary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+            }
+            
+            const layout = {
+                title: `Damped Response Analysis - ${materialName}`,
+                xaxis: {
+                    title: 'Time (s)',
+                    gridcolor: materialColors.gridColor
+                },
+                yaxis: {
+                    title: 'Amplitude (g)',
+                    gridcolor: materialColors.gridColor
+                },
+                font: {
+                    family: 'Inter, sans-serif',
+                    color: materialColors.textColor
+                },
+                plot_bgcolor: materialColors.background,
+                paper_bgcolor: materialColors.background,
+                margin: { t: 40, r: 10, b: 40, l: 50 },
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            };
+            
+            Plotly.newPlot(plotElement, traces, layout, { responsive: true });
+        }
+        
+        // Function to show error state
+        function showError() {
+            const errorHTML = `
+                <div>
+                    <div class="value-label">Error</div>
+                    <div class="value-number text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('density-output').innerHTML = errorHTML;
+            document.getElementById('viscosity-output').innerHTML = errorHTML;
+            
+            document.getElementById('plot-instruction').innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error: Failed to load material data
+            `;
+        }
+    </script>
+    
+    <!-- Natural Frequency Calculator Script -->
+    <script>
+        let oscillationChart = null;
+        
+        function initChart() {
+            try {
+                console.log("Initializing chart...");
+                const chartCanvas = document.getElementById('oscillationChart');
+                
+                // Check if the canvas element exists and is visible
+                if (!chartCanvas) {
+                    console.error("Chart canvas element not found!");
+                    return;
+                }
+                
+                // Make sure the container and tab are visible
+                const chartContainer = document.querySelector('.chart-container');
+                if (!chartContainer || chartContainer.offsetWidth === 0 || chartContainer.offsetHeight === 0) {
+                    console.log("Chart container not visible yet, retrying in 300ms...");
+                    setTimeout(initChart, 300);
+                    return;
+                }
+                
+                // If chart already exists, destroy it to prevent duplicates
+                if (oscillationChart) {
+                    console.log("Destroying existing chart instance");
+                    oscillationChart.destroy();
+                    oscillationChart = null;
+                }
+                
+                // Get updated values from form
+                const mass = parseFloat(document.getElementById('massInput').value);
+                const springConstant = parseFloat(document.getElementById('stiffnessInput').value);
+                const dampingCoefficient = parseFloat(document.getElementById('dampingInput').value);
+                const initialDisplacement = parseFloat(document.getElementById('initialDisplacement').value || 1.0);
+                
+                // Calculate damping ratio
+                const dampingRatio = dampingCoefficient / (2 * Math.sqrt(mass * springConstant));
+                let dampingType = "";
+                
+                // Determine damping type
+                if (dampingRatio < 1) {
+                    dampingType = "Underdamped";
+                } else if (Math.abs(dampingRatio - 1) < 0.001) {
+                    dampingType = "Critically Damped";
+                } else {
+                    dampingType = "Overdamped";
+                }
+                
+                // Update the damping type display
+                const dampingTypeElement = document.getElementById('dampingType');
+                if (dampingTypeElement) {
+                    dampingTypeElement.textContent = dampingType;
+                }
+                
+                // Generate data based on damping type
+                const data = [];
+                const labels = [];
+                const naturalFrequency = Math.sqrt(springConstant / mass);
+                const timeStep = 0.1;
+                const maxTime = 20;
+                
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    labels.push(t.toFixed(1));
+                    let displacement = 0;
+                    
+                    if (dampingRatio < 1) {
+                        // Underdamped case
+                        const dampedFrequency = naturalFrequency * Math.sqrt(1 - dampingRatio * dampingRatio);
+                        displacement = initialDisplacement * Math.exp(-dampingRatio * naturalFrequency * t) * 
+                                      Math.cos(dampedFrequency * t);
+                    } else if (Math.abs(dampingRatio - 1) < 0.001) {
+                        // Critically damped case
+                        displacement = initialDisplacement * Math.exp(-naturalFrequency * t) * (1 + naturalFrequency * t);
+                    } else {
+                        // Overdamped case
+                        const s1 = -dampingRatio * naturalFrequency + naturalFrequency * Math.sqrt(dampingRatio * dampingRatio - 1);
+                        const s2 = -dampingRatio * naturalFrequency - naturalFrequency * Math.sqrt(dampingRatio * dampingRatio - 1);
+                        displacement = initialDisplacement * ((s2 * Math.exp(s1 * t) - s1 * Math.exp(s2 * t)) / (s2 - s1));
+                    }
+                    
+                    data.push(displacement);
+                }
+                
+                // Create the chart with a delay to ensure DOM is ready
+                setTimeout(() => {
+                    try {
+                        console.log("Creating chart...");
+                        
+                        // Check again if canvas is accessible
+                        if (!chartCanvas || !chartCanvas.getContext) {
+                            console.error("Canvas context not available");
+                            return;
+                        }
+                        
+                        const ctx = chartCanvas.getContext('2d');
+                        
+                        oscillationChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Displacement',
+                                    data: data,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1,
+                                    pointRadius: 0, // Disable points for better performance
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    duration: 0 // Disable animation for better performance
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Time (s)'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Displacement (m)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        console.log("Chart initialized successfully!");
+                        
+                        // Update logarithmic decrement info for underdamped case
+                        if (dampingRatio < 1) {
+                            const logDecrement = 2 * Math.PI * dampingRatio / Math.sqrt(1 - dampingRatio * dampingRatio);
+                            const logDecrementElement = document.getElementById('logDecrement');
+                            if (logDecrementElement) {
+                                logDecrementElement.textContent = logDecrement.toFixed(5);
+                            }
+                        }
+                    } catch (chartError) {
+                        console.error("Error creating chart:", chartError);
+                    }
+                }, 300);
+                
+            } catch (error) {
+                console.error("Error initializing chart:", error);
+            }
+        }
+        
+        // Function to update the chart with new values
+        function updateChart() {
+            try {
+                // Get updated values from form
+                const mass = parseFloat(document.getElementById('massInput').value);
+                const springConstant = parseFloat(document.getElementById('stiffnessInput').value);
+                const dampingCoefficient = parseFloat(document.getElementById('dampingInput').value);
+                const initialDisplacement = parseFloat(document.getElementById('initialDisplacement').value || 1.0);
+                
+                // If chart doesn't exist yet, initialize it
+                if (!oscillationChart) {
+                    initChart();
+                    return;
+                }
+                
+                // Calculate damping ratio
+                const dampingRatio = dampingCoefficient / (2 * Math.sqrt(mass * springConstant));
+                let dampingType = "";
+                
+                // Determine damping type
+                if (dampingRatio < 1) {
+                    dampingType = "Underdamped";
+                } else if (Math.abs(dampingRatio - 1) < 0.001) {
+                    dampingType = "Critically Damped";
+                } else {
+                    dampingType = "Overdamped";
+                }
+                
+                // Update the damping type display
+                const dampingTypeElement = document.getElementById('dampingType');
+                if (dampingTypeElement) {
+                    dampingTypeElement.textContent = dampingType;
+                }
+                
+                // Generate new data based on damping type
+                const data = [];
+                const naturalFrequency = Math.sqrt(springConstant / mass);
+                const timeStep = 0.1;
+                const maxTime = 20;
+                
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    let displacement = 0;
+                    
+                    if (dampingRatio < 1) {
+                        // Underdamped case
+                        const dampedFrequency = naturalFrequency * Math.sqrt(1 - dampingRatio * dampingRatio);
+                        displacement = initialDisplacement * Math.exp(-dampingRatio * naturalFrequency * t) * 
+                                      Math.cos(dampedFrequency * t);
+                    } else if (Math.abs(dampingRatio - 1) < 0.001) {
+                        // Critically damped case
+                        displacement = initialDisplacement * Math.exp(-naturalFrequency * t) * (1 + naturalFrequency * t);
+                    } else {
+                        // Overdamped case
+                        const s1 = -dampingRatio * naturalFrequency + naturalFrequency * Math.sqrt(dampingRatio * dampingRatio - 1);
+                        const s2 = -dampingRatio * naturalFrequency - naturalFrequency * Math.sqrt(dampingRatio * dampingRatio - 1);
+                        displacement = initialDisplacement * ((s2 * Math.exp(s1 * t) - s1 * Math.exp(s2 * t)) / (s2 - s1));
+                    }
+                    
+                    data.push(displacement);
+                }
+                
+                // Update chart data
+                if (oscillationChart && oscillationChart.data && oscillationChart.data.datasets) {
+                    oscillationChart.data.datasets[0].data = data;
+                    oscillationChart.update();
+                    console.log("Chart updated successfully!");
+                    
+                    // Update logarithmic decrement info for underdamped case
+                    if (dampingRatio < 1) {
+                        const logDecrement = 2 * Math.PI * dampingRatio / Math.sqrt(1 - dampingRatio * dampingRatio);
+                        const logDecrementElement = document.getElementById('logDecrement');
+                        if (logDecrementElement) {
+                            logDecrementElement.textContent = logDecrement.toFixed(5);
+                        }
+                    }
+                } else {
+                    console.log("Chart not available for update, reinitializing...");
+                    oscillationChart = null;
+                    initChart();
+                }
+            } catch (error) {
+                console.error("Error updating chart:", error);
+                // If updating fails, try re-initializing
+                oscillationChart = null;
+                setTimeout(initChart, 300);
+            }
+        }
+        
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Calculate natural frequency function
+            function calculate() {
+                try {
+                    const mass = parseFloat(document.getElementById('massInput').value);
+                    const springConstant = parseFloat(document.getElementById('stiffnessInput').value);
+                    const dampingCoefficient = parseFloat(document.getElementById('dampingInput').value);
+                    
+                    // Calculate undamped natural frequency
+                    const undampedFreq = (1 / (2 * Math.PI)) * Math.sqrt(springConstant / mass);
+                    document.getElementById('undampedFreq').innerText = undampedFreq.toFixed(4);
+                    
+                    // Calculate damping ratio
+                    const dampingRatio = dampingCoefficient / (2 * Math.sqrt(mass * springConstant));
+                    
+                    // Calculate damped natural frequency
+                    let dampedFreq = 0;
+                    let dampingStatus = '';
+                    
+                    if (dampingRatio < 1) {
+                        // Underdamped
+                        dampedFreq = undampedFreq * Math.sqrt(1 - dampingRatio * dampingRatio);
+                        dampingStatus = `System is <strong>underdamped</strong> with damping ratio ζ = ${dampingRatio.toFixed(4)}`;
+                    } else if (Math.abs(dampingRatio - 1) < 0.001) {
+                        // Critically damped
+                        dampedFreq = 0;
+                        dampingStatus = `System is <strong>critically damped</strong> with damping ratio ζ = ${dampingRatio.toFixed(4)}`;
+                    } else {
+                        // Overdamped
+                        dampedFreq = 0;
+                        dampingStatus = `System is <strong>overdamped</strong> with damping ratio ζ = ${dampingRatio.toFixed(4)}`;
+                    }
+                    
+                    document.getElementById('dampedFreq').innerText = dampedFreq.toFixed(4);
+                    document.getElementById('dampingStatus').innerHTML = dampingStatus;
+                    
+                    // Update the chart with new values
+                    updateChart();
+                } catch (error) {
+                    console.error("Error calculating frequencies:", error);
+                }
+            }
+            
+            // Set up calculate button
+            const calculateBtn = document.getElementById('calculateBtn');
+            if (calculateBtn) {
+                calculateBtn.addEventListener('click', calculate);
+            }
+            
+            // Update frequencies when inputs change
+            const inputs = ['massInput', 'stiffnessInput', 'dampingInput', 'initialDisplacement'];
+            inputs.forEach(input => {
+                const element = document.getElementById(input);
+                if (element) {
+                    element.addEventListener('input', calculate);
+                }
+            });
+            
+            // If calculator tab is active on page load, initialize chart
+            if (document.getElementById('calculator-tab').classList.contains('active')) {
+                setTimeout(() => {
+                    initChart();
+                    calculate();
+                }, 500);
+            }
+            
+            // Handle tab clicks for main tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.getAttribute('data-tab') === 'calculator-tab') {
+                        setTimeout(() => {
+                            initChart();
+                            calculate();
+                        }, 500);
+                    }
+                });
+            });
+            
+            // Handle bootstrap tab events for visualization tabs
+            const graphTab = document.getElementById('graph-tab');
+            if (graphTab) {
+                graphTab.addEventListener('shown.bs.tab', function() {
+                    setTimeout(() => {
+                        initChart();
+                    }, 300);
+                });
+            }
+        });
+        
+        // Force initial layout calculation for chart container
+        window.addEventListener('load', function() {
+            const chartContainer = document.querySelector('.chart-container');
+            if (chartContainer) {
+                chartContainer.style.display = 'block';
+                chartContainer.style.visibility = 'visible';
+            }
         });
     </script>
-
 </body>
 </html>

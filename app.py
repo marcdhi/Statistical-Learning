@@ -196,6 +196,13 @@ def ml_model(path):
         print(traceback.format_exc())
         return (0.0, 0.0)
 
+def predict_damping(viscosity, density):
+    model = joblib.load(r"\models\damping.joblib")
+    new_data = pd.DataFrame([[viscosity, density]], columns=['Viscosity', 'Density'])
+    prediction = model.predict(new_data)
+    return prediction[0]
+    
+
 # --- Plot Generation Function (using Plotly) ---
 def generate_plot_json(path_context=""):
     """Generates professional Plotly plot data as JSON."""

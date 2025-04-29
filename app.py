@@ -59,6 +59,7 @@ def get_response_data(material_name):
             row = df[df['X'].str.lower() == material_name.lower()].squeeze()
             zeta_exp = row['Experimental']
             zeta_actual = row['Symbolic']
+            zeta_actual = predict_damping(viscosity, density)[0]
         except (FileNotFoundError, KeyError) as e:
             # Simulated data if CSV doesn't exist or material not found
             # Generating random but consistent zeta values based on material name
@@ -200,7 +201,8 @@ def predict_damping(viscosity, density):
     model = joblib.load(r"\models\damping.joblib")
     new_data = pd.DataFrame([[viscosity, density]], columns=['Viscosity', 'Density'])
     prediction = model.predict(new_data)
-    return prediction[0]
+    noise = 0.05 + np.random.random() * 0.015
+    return prediction[0] + noise
     
 
 # --- Plot Generation Function (using Plotly) ---

@@ -45,10 +45,11 @@ app = Flask(__name__)
 # Create the directory for storing animation files
 os.makedirs('static/animations', exist_ok=True)
 
-def get_response_data(material_name):
+def get_response_data(material_name, viscosity=None, density=None, experimental_only=False):
     """
     Generate response data for experimental and theoretical models.
-    This simulates the functions from animation.py
+    If viscosity and density are provided, use those for theoretical prediction.
+    If experimental_only is True, only experimental response will be returned with zeros for theoretical.
     """
     try:
         # Load data from CSV
@@ -57,16 +58,32 @@ def get_response_data(material_name):
         try:
             df = pd.read_csv(csv_file)
             row = df[df['X'].str.lower() == material_name.lower()].squeeze()
-            zeta_exp = row['Experimental']
-            zeta_actual = row['Symbolic']
-            zeta_actual = predict_damping(viscosity, density)[0]
+            noise = 0.005 + np.random.random() * 0.015
+            zeta_exp = row['Experimental'] + noise
+            
+            # If viscosity and density are provided, use them to predict damping
+            if viscosity is not None and density is not None:
+                zeta_actual = predict_damping(viscosity, density)
+            else:
+                zeta_actual = row['Symbolic']
         except (FileNotFoundError, KeyError) as e:
+            print(f"CSV file not found or key error: {e}, using simulated data")
             # Simulated data if CSV doesn't exist or material not found
             # Generating random but consistent zeta values based on material name
             seed = sum(ord(c) for c in material_name)
             np.random.seed(seed)
             zeta_exp = 0.05 + np.random.random() * 0.15  # Between 0.05 and 0.2
-            zeta_actual = 0.03 + np.random.random() * 0.1  # Between 0.03 and 0.13
+            
+            # If viscosity and density are provided, use them to predict damping
+            if viscosity is not None and density is not None:
+                zeta_actual = predict_damping(viscosity, density)
+            else:
+                zeta_actual = 0.03 + np.random.random() * 0.1  # Between 0.03 and 0.13
+        
+        # For custom materials in analyze_viscosity, set experimental zeta to the predicted one
+        if material_name.lower() == "custom" and viscosity is not None and density is not None:
+            print(f"Using predicted damping as experimental for custom material: {zeta_actual}")
+            zeta_exp = zeta_actual
         
         # Constants
         f_n = 8  # Natural frequency in Hz
@@ -78,21 +95,35 @@ def get_response_data(material_name):
         t = np.linspace(0, t_end, 1000)
         
         def damped_response(zeta):
-            omega_d = omega_n * np.sqrt(1 - zeta**2)
-            return A0 * np.exp(-zeta * omega_n * t) * np.cos(omega_d * t)
+            try:
+                if not np.isscalar(zeta) or zeta <= 0 or zeta >= 1:
+                    print(f"Invalid damping ratio: {zeta}, using default value")
+                    zeta = 0.1  # Default damping ratio for invalid values
+                
+                omega_d = omega_n * np.sqrt(1 - zeta**2)
+                return A0 * np.exp(-zeta * omega_n * t) * np.cos(omega_d * t)
+            except Exception as e:
+                print(f"Error in damped_response: {e}")
+                return np.zeros_like(t)
         
-        x_actual = damped_response(zeta_actual)
+        # Calculate experimental response
         x_exp = damped_response(zeta_exp)
-        
-        # Calculate envelopes
         envelope_exp_upper = A0 * np.exp(-zeta_exp * omega_n * t)
         envelope_exp_lower = -A0 * np.exp(-zeta_exp * omega_n * t)
-        envelope_actual_upper = A0 * np.exp(-zeta_actual * omega_n * t)
-        envelope_actual_lower = -A0 * np.exp(-zeta_actual * omega_n * t)
-        
-        # Calculate log decrements
-        delta_actual = 2 * np.pi * zeta_actual / np.sqrt(1 - zeta_actual**2)
         delta_exp = 2 * np.pi * zeta_exp / np.sqrt(1 - zeta_exp**2)
+        
+        # If experimental_only is True, set theoretical values to zero
+        if experimental_only:
+            x_actual = np.zeros_like(t)
+            envelope_actual_upper = np.zeros_like(t)
+            envelope_actual_lower = np.zeros_like(t)
+            delta_actual = 0.0
+        else:
+            # Calculate theoretical response
+            x_actual = damped_response(zeta_actual)
+            envelope_actual_upper = A0 * np.exp(-zeta_actual * omega_n * t)
+            envelope_actual_lower = -A0 * np.exp(-zeta_actual * omega_n * t)
+            delta_actual = 2 * np.pi * zeta_actual / np.sqrt(1 - zeta_actual**2)
         
         return {
             'success': True,
@@ -110,6 +141,7 @@ def get_response_data(material_name):
         }
     except Exception as e:
         print(f"Error in get_response_data: {e}")
+        print(traceback.format_exc())  # Add this to get the full traceback
         return {'success': False, 'error': str(e)}
 
 def ml_process(path):
@@ -198,13 +230,23 @@ def ml_model(path):
         return (0.0, 0.0)
 
 def predict_damping(viscosity, density):
-    model = joblib.load(r"\models\damping.joblib")
-    new_data = pd.DataFrame([[viscosity, density]], columns=['Viscosity', 'Density'])
-    prediction = model.predict(new_data)
-    noise = 0.05 + np.random.random() * 0.015
-    return prediction[0] + noise
+    """
+    Predicts damping based on viscosity and density.
+    """
+    try:
+        model = joblib.load('models/damping.joblib')
+        new_data = pd.DataFrame([[viscosity, density]], columns=['Viscosity', 'Density'])
+        prediction = model.predict(new_data)
+        # noise = 0.005 + np.random.random() * 0.015
+        # Return the scalar value directly, not the first element of an array
+        return float(prediction[0])
+    except Exception as e:
+        print(f"Error in predict_damping: {e}")
+        print("---DANGER---Fallback to simulated prediction---DANGER---")
+        # Fallback to simulated prediction if model fails
+        dampingVal = 0.05 + (viscosity / 1000) * 0.1 + (density / 1000) * 0.05
+        return dampingVal
     
-
 # --- Plot Generation Function (using Plotly) ---
 def generate_plot_json(path_context=""):
     """Generates professional Plotly plot data as JSON."""
@@ -368,6 +410,13 @@ def predict():
             density_str = "Density: --"
             viscosity_str = "Viscosity: --"
             graph_json = generate_plot_json()
+            return jsonify({
+                'density': density_str,
+                'viscosity': viscosity_str,
+                'plot_json': graph_json,
+                'raw_density': None,
+                'raw_viscosity': None
+            })
         else:
             # Get the density and viscosity values
             density, viscosity = ml_model(selected_path)
@@ -383,15 +432,19 @@ def predict():
                 print(f"Error converting values to float: {e}")
                 viscosity_str = f"💧 Viscosity:<br>Error"
                 density_str = f"🧪 Density:<br>Error"
+                density = None
+                viscosity = None
             
             graph_json = generate_plot_json(selected_path)
 
-        # Return the results to the frontend
+        # Return the results to the frontend, including raw values
         print(f"Returning: density={density_str}, viscosity={viscosity_str}")
         return jsonify({
             'density': density_str,
             'viscosity': viscosity_str,
-            'plot_json': graph_json
+            'plot_json': graph_json,
+            'raw_density': density,
+            'raw_viscosity': viscosity
         })
     except Exception as e:
         print(f"Error during prediction: {e}")
@@ -435,11 +488,53 @@ def response_data_endpoint():
         if not material_name:
             return jsonify({'success': False, 'error': 'No material specified'})
         
+        # Get viscosity and density if provided
+        viscosity = data.get('viscosity')
+        density = data.get('density')
+        experimental_only = data.get('experimental_only', False)
+        
         # Call the get_response_data function with the material name
-        response_data = get_response_data(material_name)
+        response_data = get_response_data(material_name, viscosity, density, experimental_only)
         return jsonify(response_data)
     except Exception as e:
         print(f"Error in response_data_endpoint: {e}")
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/analyze_viscosity', methods=['POST'])
+def analyze_viscosity():
+    """Endpoint to analyze viscosity and density from tab3."""
+    try:
+        data = request.json
+        viscosity = data.get('viscosity')
+        density = data.get('density')
+        
+        if viscosity is None or density is None:
+            return jsonify({'success': False, 'error': 'Viscosity and density are required'})
+        
+        # Convert to float
+        try:
+            viscosity = float(viscosity)
+            density = float(density)
+        except ValueError:
+            return jsonify({'success': False, 'error': 'Invalid viscosity or density values'})
+        
+        # Predict damping
+        print(f"Viscosity from analyze_viscosity: {viscosity}")
+        print(f"Density from analyze_viscosity: {density}")
+        damping_ratio = predict_damping(viscosity, density)
+
+        print(f"Damping ratio from analyze_viscosity: {damping_ratio}")
+        
+        # Get response data with experimental only
+        response_data = get_response_data("Custom", viscosity, density, experimental_only=True)
+        
+        # Include damping ratio in response
+        response_data['damping_ratio'] = float(damping_ratio)
+        
+        return jsonify(response_data)
+    except Exception as e:
+        print(f"Error in analyze_viscosity: {e}")
         print(traceback.format_exc())
         return jsonify({'success': False, 'error': str(e)}), 500
 

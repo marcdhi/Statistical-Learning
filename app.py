@@ -57,15 +57,23 @@ def get_response_data(material_name, viscosity=None, density=None, experimental_
         
         try:
             df = pd.read_csv(csv_file)
-            row = df[df['X'].str.lower() == material_name.lower()].squeeze()
-            noise = 0.005 + np.random.random() * 0.015
-            zeta_exp = row['Experimental'] + noise
+            row_df = df[df['X'].str.lower() == material_name.lower()]
             
-            # If viscosity and density are provided, use them to predict damping
-            if viscosity is not None and density is not None:
-                zeta_actual = predict_damping(viscosity, density)
+            # Check if we actually found a row and if it has the required data
+            if not row_df.empty and 'Experimental' in row_df.columns and not pd.isna(row_df['Experimental'].iloc[0]):
+                row = row_df.squeeze()
+                noise = 0.005 + np.random.random() * 0.015
+                zeta_exp = float(row['Experimental']) + noise
+                
+                # If viscosity and density are provided, use them to predict damping
+                if viscosity is not None and density is not None:
+                    zeta_actual = predict_damping(viscosity, density)
+                else:
+                    zeta_actual = float(row['Symbolic'])
             else:
-                zeta_actual = row['Symbolic']
+                # If row not found or data is missing, raise KeyError to fall back to simulated data
+                raise KeyError(f"Material '{material_name}' not found or has incomplete data in CSV")
+                
         except (FileNotFoundError, KeyError) as e:
             print(f"CSV file not found or key error: {e}, using simulated data")
             # Simulated data if CSV doesn't exist or material not found
@@ -188,6 +196,19 @@ def ml_model(path):
             "Amla Oil": os.path.join("tests", "Amla_Oil.csv"),
             "Ghee": os.path.join("tests", "Ghee.csv"),
             "Pepsi": os.path.join("tests", "Pepsi.csv"),
+            "2T": os.path.join("tests", "2T.csv"),
+            "15W40": os.path.join("tests", "15W40.csv"),
+            "20W40": os.path.join("tests", "20W40.csv"),
+            "air": os.path.join("tests", "air.csv"),
+            "Badam_Oil": os.path.join("tests", "Badam_Oil.csv"),
+            "Castor_Oil": os.path.join("tests", "Castor_Oil.csv"),
+            "Ghee": os.path.join("tests", "Ghee.csv"),
+            "Milk": os.path.join("tests", "Milk.csv"),
+            "Olive_Oil": os.path.join("tests", "Olive_Oil.csv"),
+            "SAE30": os.path.join("tests", "SAE30.csv"),
+            "Sprite": os.path.join("tests", "Sprite.csv"),
+            "Vinegar": os.path.join("tests", "Vinegar.csv"),
+            "Water": os.path.join("tests", "Water.csv")
         }
         
         # Default fallback test file
@@ -383,15 +404,32 @@ def generate_plot_json(path_context=""):
 # --- Flask Routes ---
 @app.route('/')
 def index():
-    """Renders the main HTML page."""
+    """Render the main page."""
     try:
-        print("Rendering index page")
-        initial_plot_json = generate_plot_json()
-        paths = ["Pepsi", "Amla Oil", "Ghee"]
-        return render_template('index.html',
-                              paths=paths,
-                              initial_plot_json=initial_plot_json,
-                              colors=MATERIAL_COLORS)
+        test_materials = ["Amla_Oil", "Pepsi", "Ghee"]
+        
+        # Get all materials in the tests folder
+        train_materials = []
+        test_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests')
+        for file in os.listdir(test_folder):
+            if file.endswith('.csv'):
+                material_name = os.path.splitext(file)[0]
+                if material_name not in test_materials:
+                    train_materials.append(material_name)
+        
+        # Sort for consistent display
+        train_materials.sort()
+
+        # remove air from train_materials
+        train_materials = [material for material in train_materials if material != "air"]
+        
+        # Updated color scheme
+        colors = MATERIAL_COLORS
+        
+        return render_template('index.html', 
+                              test_materials=test_materials,
+                              train_materials=train_materials,
+                              colors=colors)
     except Exception as e:
         print(f"Error in index route: {e}")
         print(traceback.format_exc())

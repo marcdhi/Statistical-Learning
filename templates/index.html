@@ -1,654 +1,617 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistical Learning Based Inverse Modelling</title>
     <!-- Bootstrap CSS -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
-    <style>
-      .input-group input[type="number"] {
-        text-align: right;
-        font-family: monospace;
-      }
-      .display-4 {
-        font-family: monospace;
-        letter-spacing: -0.05em;
-      }
-      .small {
-        font-size: 0.85em;
-      }
-      .chart-container {
-        position: relative;
-        height: 300px;
-        width: 100%;
-        margin-top: 20px;
-      }
-      .nav-tabs .nav-link {
-        cursor: pointer;
-      }
-    </style>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Optional Custom CSS -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
-    <style>
-      /* Enhanced custom styles */
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f8f9fa;
-        padding-top: 80px;
-        color: #2c3e50;
-      }
+    <!-- MathJax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <!-- Animation.js -->
+    <script src="{{ url_for('static', filename='js/animation.js') }}"></script>
+    <!-- D3.js for advanced visualizations -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
 
-      .navbar {
-        background: linear-gradient(
-          135deg,
-          #1a365d 0%,
-          #2c5282 100%
-        ) !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        padding: 1rem 0;
-      }
-
-      .navbar-brand {
-        font-weight: 600;
-        font-size: 1.4rem;
-        color: white !important;
-      }
-
-      .nav-link {
-        color: rgba(255, 255, 255, 0.9) !important;
-        font-weight: 500;
-      }
-
-      .page-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
-        padding: 2rem 0;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-      }
-
-      .page-header h1 {
-        font-weight: 700;
-        color: #1a365d;
-        font-size: 2.2rem;
-        margin-bottom: 1rem;
-      }
-
-      .page-header p {
-        color: #718096;
-        font-size: 1.1rem;
-        max-width: 800px;
-        margin: 0 auto;
-      }
-
-      .card {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        margin-bottom: 25px;
-        background: white;
-        transition: transform 0.2s ease;
-      }
-
-      .card:hover {
-        transform: translateY(-2px);
-      }
-
-      .card-header {
-        background-color: white;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 1rem 1.5rem;
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 1.1rem;
-      }
-
-      .output-card {
-        min-height: 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: 1.2em;
-        font-weight: 500;
-        color: #2d3748;
-        padding: 1.5rem;
-      }
-
-      .form-select,
-      .btn {
-        border-radius: 8px;
-        font-size: 1rem;
-      }
-
-      .form-select {
-        border-color: #e2e8f0;
-        padding: 0.75rem;
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-        border: none;
-        padding: 0.75rem 2rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(45, 55, 72, 0.2);
-      }
-
-      #plot-area {
-        min-height: 450px;
-        padding: 1rem;
-      }
-
-      .value-label {
-        font-size: 0.9rem;
-        color: #718096;
-        margin-bottom: 0.5rem;
-      }
-
-      .value-number {
-        font-size: 1.8rem;
-        font-weight: 600;
-        color: #2d3748;
-      }
-
-      .value-unit {
-        font-size: 1rem;
-        color: #718096;
-      }
-
-      .nitk-logo {
-        height: 40px;
-        margin-right: 15px;
-        background-color: white;
-      }
-
-      #animation-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 300px;
-        padding: 1rem;
-      }
-
-      .animation-gif {
-        max-width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .tabs-container {
-        margin-bottom: 1rem;
-      }
-
-      .tab-btn {
-        border: none;
-        background-color: #f1f5f9;
-        padding: 10px 20px;
-        border-radius: 8px 8px 0 0;
-        font-weight: 500;
-        color: #718096;
-        margin-right: 5px;
-        border-bottom: 3px solid transparent;
-      }
-
-      .tab-btn.active {
-        color: #1a365d;
-        background-color: white;
-        border-bottom: 3px solid #1a365d;
-      }
-
-      .tab-content {
-        display: none;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-    </style>
-  </head>
-  <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-      <div class="container">
+      <div class="container-fluid">
         <a class="navbar-brand" href="#">
-          <img
-            src="{{ url_for('static', filename='images/NITK.png') }}"
-            alt="NITK Logo"
-            class="nitk-logo"
-          />
-          Statistical Learning Lab
+            <img src="{{ url_for('static', filename='images/NITK.png') }}" alt="NITK Logo" class="nitk-logo">
+            <span>Statistical Learning Based Inverse Modelling</span>
         </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto"></ul>
+          <ul class="navbar-nav ms-auto">
+            <!-- You could add more navigation items here if needed -->
+          </ul>
         </div>
       </div>
     </nav>
 
+
+
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-lg-block">
+        <!-- Test Materials Section -->
+        <div class="sidebar-heading">
+            <i class="fas fa-flask me-2"></i>Test Liquids
+        </div>
+        <ul class="material-list" id="test-material-list">
+            {% for material in test_materials %}
+            <li class="material-item" data-material="{{ material }}">
+                {% if colors and colors|length > 0 %}
+                <span class="color-indicator" style="background-color: {{ colors[loop.index0 % colors|length] }};"></span>
+                {% else %}
+                <span class="color-indicator" style="background-color: #4299e1;"></span>
+                {% endif %}
+                <span>{{ material }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <!-- Train Materials Section -->
+        <div class="sidebar-heading">
+            <i class="fas fa-vial me-2"></i>Train Liquids
+        </div>
+        <ul class="material-list" id="train-material-list">
+            {% for material in train_materials %}
+            <li class="material-item" data-material="{{ material }}">
+                {% if colors and colors|length > 0 %}
+                <span class="color-indicator" style="background-color: {{ colors[(loop.index0 + test_materials|length) % colors|length] }};"></span>
+                {% else %}
+                <span class="color-indicator" style="background-color: #4299e1;"></span>
+                {% endif %}
+                <span>{{ material }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Mobile Material Selector (only visible on small screens) -->
+    <div class="container d-block d-lg-none mt-3">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-flask me-2"></i>Material Selection
+            </div>
+            <div class="card-body">
+                <select class="form-select" id="mobile-material-select">
+                    <option selected>Choose a material...</option>
+                    <optgroup label="Test Materials">
+                        {% for material in test_materials %}
+                        <option value="{{ material }}">{{ material }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Train Materials">
+                        {% for material in train_materials %}
+                        <option value="{{ material }}">{{ material }}</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <div class="container">
-      <!-- Page Header -->
-      <div class="page-header">
-        <h1>Statistical Learning Based Inverse Modelling</h1>
-        <p>
-          Advanced physical system analysis through machine learning and
-          statistical inference
-        </p>
-      </div>
+    <div class="main-content">
+        <div class="container">
+            <!-- Remove old page header -->
 
-      <!-- Input Section -->
-      <!-- Tabs Navigation -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <div class="tabs-container">
-            <button class="tab-btn active" data-tab="analysis-tab">
-              Analysis
-            </button>
-            <button class="tab-btn" data-tab="tab-2">Tab 2</button>
-            <button class="tab-btn" data-tab="tab-3">Tab 3</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Analysis Tab Content -->
-      <div id="analysis-tab" class="tab-content active">
-        <!-- Input Section -->
-        <div class="card mb-4">
-          <div class="card-header">
-            <i class="fas fa-sliders-h me-2"></i>Model Parameters
-          </div>
-          <div class="card-body">
-            <form id="prediction-form" class="py-2">
-              <div class="row g-4 align-items-center">
-                <div class="col-md-4">
-                  <label for="path-select" class="form-label"
-                    >Select the FFT</label
-                  >
-                  <select class="form-select" id="path-select" name="path">
-                    <option selected>Choose a path...</option>
-                    {% for path in paths %}
-                    <option value="{{ path }}">{{ path }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                  <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-play me-2"></i>Run Analysis
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        <!-- Output Section -->
-        <div class="row mb-4">
-          <div class="col-md-6">
+            <!-- Dashboard Tabs -->
             <div class="card">
-              <div class="card-body output-card" id="density-output">
-                <div>
-                  <div class="value-label">Density</div>
-                  <div class="value-number">--</div>
-                  <div class="value-unit">kg/m³</div>
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-2"></i>Analysis Dashboard
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card">
-              <div class="card-body output-card" id="viscosity-output">
-                <div>
-                  <div class="value-label">Viscosity</div>
-                  <div class="value-number">--</div>
-                  <div class="value-unit">mPa·s</div>
+                <div class="card-body p-0">
+                    <div class="tabs-container">
+                        <button class="tab-btn active" data-tab="dashboard-tab">
+                            <i class="fas fa-chart-bar me-2"></i>Material Analysis
+                        </button>
+                        <button class="tab-btn" data-tab="calculator-tab">
+                            <i class="fas fa-calculator me-2"></i>Natural Frequency Calculator
+                        </button>
+                        <button class="tab-btn" data-tab="viscosity-tab">
+                            <i class="fas fa-tint me-2"></i>Viscosity Analysis
+                        </button>
+                    </div>
+                    
+                    <!-- Dashboard Tab (Tab 1) - Updated Layout -->
+                    <div id="dashboard-tab" class="tab-content active p-4">
+                        <div class="row">
+                            <!-- Left column: Material info -->
+                            <div class="col-md-4">
+                                <!-- Material info card -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-flask me-2"></i>Material Properties
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="list-group list-group-flush">
+                                            <div class="list-group-item">
+                                                <div class="output-card" id="density-output">
+                                        <div>
+                                            <div class="value-label">Density</div>
+                                            <div class="value-number">--</div>
+                                            <div class="value-unit">kg/m³</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                            <div class="list-group-item">
+                                                <div class="output-card" id="viscosity-output">
+                                        <div>
+                                            <div class="value-label">Viscosity</div>
+                                            <div class="value-number">--</div>
+                                            <div class="value-unit">mPa·s</div>
+                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                                <!-- Damping Properties Card -->
+                                <div class="card">
+                            <div class="card-header">
+                                        <i class="fas fa-wave-square me-2"></i>Damping Properties
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                            <div class="col-6">
+                                                <h6 class="card-subtitle mb-2 text-muted">Experimental</h6>
+                                                <div class="text-muted small">
+                                                    <strong>Damping Ratio (ζ):</strong><br>
+                                                    <span id="exp-damping" class="fw-bold">--</span>
+                                        </div>
+                                                <div class="text-muted small mt-2">
+                                                    <strong>Logarithmic Decrement (δ):</strong><br>
+                                                    <span id="exp-decrement" class="fw-bold">--</span>
+                                    </div>
+                                </div>
+                                            <div class="col-6">
+                                                <h6 class="card-subtitle mb-2 text-muted">Theoretical</h6>
+                                                <div class="text-muted small">
+                                                    <strong>Damping Ratio (ζ):</strong><br>
+                                                    <span id="theo-damping" class="fw-bold">--</span>
+                                                </div>
+                                                <div class="text-muted small mt-2">
+                                                    <strong>Logarithmic Decrement (δ):</strong><br>
+                                                    <span id="theo-decrement" class="fw-bold">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-info mt-3 mb-0" id="plot-instruction">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Select a material from the sidebar to view the comparison plots.
+                                    </div>
+                                                </div>
+                                                </div>
+                                            </div>
+                            
+                            <!-- Right column: Response comparison plot -->
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-chart-line me-2"></i>Response Comparison
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="plot-container" id="comparison-plot">
+                                            <!-- Plot will be rendered here -->
+                                        </div>
+                                        
+                                        <!-- Animation description -->
+                                        <div class="alert alert-light mt-3">
+                                            <h6><i class="fas fa-info-circle me-2"></i>About This Graph</h6>
+                                            <p class="mb-0 small">
+                                                This graph compares the theoretical damping response predicted by the model with the experimental response.
+                                                The envelope curves show the decay pattern.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calculator Tab -->
+                    <div id="calculator-tab" class="tab-content p-4">
+                        <div class="row">
+                            <!-- Left Column: Controls -->
+                            <div class="col-md-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-flask me-2"></i>Material Properties
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Material Info -->
+                                        <div class="alert alert-info mb-3">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <span id="calculator-material-name">Select a material from the sidebar</span>
+                                        </div>
+                                        
+                                        <!-- Damping Ratio Display -->
+                                        <div class="mb-4">
+                                            <label class="form-label d-flex justify-content-between">
+                                                <span>Damping Ratio (ζ): <strong id="damping-ratio-value">0.1</strong></span>
+                                            </label>
+                                            <div class="progress">
+                                                <div id="damping-ratio-progress" class="progress-bar" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                            <div class="text-muted small mt-1">Material's measured damping ratio</div>
+                                        </div>
+                                        
+                                        <div class="border-top pt-3 mt-3">
+                                            <p class="text-muted small">Adjust the parameters below to see how they affect the system behavior. Natural frequency is fixed at 9 Hz.</p>
+                                        </div>
+                                </div>
+                            </div>
+
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-sliders-h me-2"></i>Beam Parameters
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Young's Modulus Slider -->
+                                        <div class="mb-4">
+                                            <label for="youngModulusSlider" class="form-label d-flex justify-content-between">
+                                                <span>Young's Modulus (E): <strong id="youngModulusValue">200</strong> GPa</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="youngModulusSlider" 
+                                                min="50" max="400" step="5" value="200">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">50</small>
+                                                <small class="text-muted">400 GPa</small>
+                                        </div>
+                                    </div>
+
+                                        <!-- Width Slider -->
+                                        <div class="mb-4">
+                                            <label for="beamWidthSlider" class="form-label d-flex justify-content-between">
+                                                <span>Width (b): <strong id="beamWidthValue">25.4</strong> mm</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="beamWidthSlider" 
+                                                min="10" max="50" step="0.1" value="25.4">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">10</small>
+                                                <small class="text-muted">50 mm</small>
+                                </div>
+                            </div>
+
+                                        <!-- Thickness Slider -->
+                                        <div class="mb-4">
+                                            <label for="beamThicknessSlider" class="form-label d-flex justify-content-between">
+                                                <span>Thickness (h): <strong id="beamThicknessValue">1.0</strong> mm</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="beamThicknessSlider" 
+                                                min="0.5" max="5" step="0.1" value="1.0">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0.5</small>
+                                                <small class="text-muted">5 mm</small>
+                                    </div>
+                                        </div>
+
+                                        <!-- Length Slider -->
+                                        <div class="mb-4">
+                                            <label for="beamLengthSlider" class="form-label d-flex justify-content-between">
+                                                <span>Length (L): <strong id="beamLengthValue">275</strong> mm</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="beamLengthSlider" 
+                                                min="100" max="500" step="5" value="275">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">100</small>
+                                                <small class="text-muted">500 mm</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Results and Visualization -->
+                            <div class="col-md-8">
+                                <!-- Results Card -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-line me-2"></i>Calculated Parameters
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-4">
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <h6 class="text-muted mb-2">Stiffness (k)</h6>
+                                                    <div class="display-6 mb-0" id="stiffnessResult">--</div>
+                                                    <div class="text-muted">N/m</div>
+                                        </div>
+                                    </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <h6 class="text-muted mb-2">Mass (m)</h6>
+                                                    <div class="display-6 mb-0" id="massResult">--</div>
+                                                    <div class="text-muted">kg</div>
+                                </div>
+                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <h6 class="text-muted mb-2">Damping (c)</h6>
+                                                    <div class="display-6 mb-0" id="dampingResult">--</div>
+                                                    <div class="text-muted">N·s/m</div>
+                        </div>
+                                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                                <div class="text-center">
+                                                    <h6 class="text-muted mb-2">Natural Frequency</h6>
+                                                    <div class="display-6 mb-0" id="undampedFreq">9.00</div>
+                                                    <div class="text-muted">Hz</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                                <div class="text-center">
+                                                    <h6 class="text-muted mb-2">Damped Frequency</h6>
+                                                    <div class="display-6 mb-0" id="dampedFreq">--</div>
+                                                    <div class="text-muted">Hz</div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                                <!-- Visualization -->
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-chart-area me-2"></i>Response Visualization
+                                        </div>
+                            </div>
+                            <div class="card-body">
+                                        <div class="chart-container" style="height: 350px;">
+                                            <canvas id="oscillationChart"></canvas>
+                                        </div>
+                                        
+                                        <!-- Description -->
+                                        <div class="alert alert-light mt-3">
+                                            <h6><i class="fas fa-info-circle me-2"></i>About This Graph</h6>
+                                            <p class="mb-0 small">
+                                                This visualization shows the oscillation of a cantilever beam system with the selected material's damping ratio.
+                                                The natural frequency is fixed at 9 Hz, while other parameters can be adjusted to see their effect on the system.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
+            
+            <!-- New Viscosity Analysis Tab -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-tint me-2"></i>Viscosity Analysis
+                </div>
+                <div class="card-body p-0">
+                    <div id="viscosity-tab" class="tab-content p-4">
+                        <div class="row">
+                            <!-- Left column: Controls and results -->
+                            <div class="col-md-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-sliders-h me-2"></i>Fluid Properties
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Density Slider -->
+                                        <div class="mb-4">
+                                            <label for="densitySlider" class="form-label d-flex justify-content-between">
+                                                <span>Density (ρ): <strong id="densityValue">1000</strong> kg/m³</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="densitySlider" 
+                                                min="500" max="2000" step="10" value="1000">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">500</small>
+                                                <small class="text-muted">2000 kg/m³</small>
+                                </div>
+                            </div>
+
+                                        <!-- Viscosity Slider -->
+                                        <div class="mb-4">
+                                            <label for="viscositySlider" class="form-label d-flex justify-content-between">
+                                                <span>Viscosity (μ): <strong id="viscosityValue">10</strong> mPa·s</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="viscositySlider" 
+                                                min="0.1" max="100" step="0.1" value="10">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">0.1</small>
+                                                <small class="text-muted">100 mPa·s</small>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                                        <div class="d-grid">
+                                            <button id="analyzeViscosityBtn" class="btn btn-primary">
+                                                <i class="fas fa-microscope me-2"></i>Analyze Fluid
+                            </button>
+                                        </div>
+                                    </div>
+                        </div>
+
+                                <!-- Results Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-line me-2"></i>Analysis Results
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="analysisStatus" class="alert alert-info mb-4">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Adjust sliders and click analyze to see results.
+                                        </div>
+                                        
+                                        <div class="text-center mb-3">
+                                            <h5>Damping Ratio (ζ)</h5>
+                                            <div class="display-4 mb-1" id="dampingRatio">--</div>
+                                    </div>
+                                        
+                                        <div class="text-muted">
+                                            <strong>Damping Type:</strong> 
+                                            <span id="viscDampingType" class="badge bg-primary">--</span>
+                                </div>
+                                        
+                                        <!-- Damping Classification Guide -->
+                                        <div class="mt-3 pt-3 border-top">
+                                            <h6>Damping Classification:</h6>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="badge bg-success me-2">Underdamped</span>
+                                                <small>ζ < 1</small>
+                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="badge bg-warning text-dark me-2">Critical</span>
+                                                <small>ζ = 1</small>
+                                    </div>
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-danger me-2">Overdamped</span>
+                                                <small>ζ > 1</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                            <!-- Right column: Visualization -->
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-chart-area me-2"></i>Fluid Response Visualization
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="showEnvelopeToggle" checked>
+                                            <label class="form-check-label" for="showEnvelopeToggle">Show Envelope</label>
+                                        </div>
+                            </div>
+                            <div class="card-body">
+                                        <div class="chart-container" style="height: 350px;">
+                                    <canvas id="fluidResponseChart"></canvas>
+                                        </div>
+                                        
+                                        <!-- Animation description -->
+                                        <div class="alert alert-light mt-3">
+                                            <h6><i class="fas fa-info-circle me-2"></i>About This Visualization</h6>
+                                            <p class="mb-0 small">
+                                                This graph shows the damped oscillation response based on the fluid properties.
+                                                The decay rate of the oscillation is directly related to the damping ratio.
+                                                Higher viscosity typically results in faster energy dissipation and greater damping.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="text-center py-4 mt-4 text-muted">
+                <small>© 2025 Statistical Learning Lab. All rights reserved.</small>
+            </footer>
         </div>
-
-        <!-- Visualization -->
-        <div class="card mb-4">
-          <div class="card-header">
-            <i class="fas fa-chart-line me-2"></i>Analysis Visualization
-          </div>
-          <div class="card-body">
-            <div id="animation-container">
-              <div class="text-center text-muted">
-                <i class="fas fa-film fa-3x mb-3"></i>
-                <p>
-                  Select a material and click "Run Analysis" to visualize the
-                  damped response.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 2 Content -->
-      <div id="tab-2" class="tab-content">
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-calculator me-2"></i>Natural Frequency Calculator
-          </div>
-          <div class="card-body">
-            <div class="row g-4">
-              <!-- Input Section -->
-              <div class="col-md-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <label class="form-label">Mass (m)</label>
-                    <div class="input-group">
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="massInput"
-                        value="2.0000"
-                        min="0.0001"
-                        max="50"
-                        step="0.0001"
-                      />
-                      <span class="input-group-text">kg</span>
-                    </div>
-                    <small class="text-muted">Range: 0.0001-50 kg</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <label class="form-label">Stiffness (k)</label>
-                    <div class="input-group">
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="stiffnessInput"
-                        value="5000.00"
-                        min="100"
-                        max="100000"
-                        step="0.01"
-                      />
-                      <span class="input-group-text">N/m</span>
-                    </div>
-                    <small class="text-muted">Range: 100-100,000 N/m</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <label class="form-label">Damping (c)</label>
-                    <div class="input-group">
-                      <input
-                        type="number"
-                        class="form-control"
-                        id="dampingInput"
-                        value="20.000"
-                        min="0"
-                        max="500"
-                        step="0.001"
-                      />
-                      <span class="input-group-text">N·s/m</span>
-                    </div>
-                    <small class="text-muted">Range: 0-500 N·s/m</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Calculate Button -->
-            <div class="text-center mt-4">
-              <button id="calculateBtn" class="btn btn-primary btn-lg">
-                <i class="fas fa-calculator me-2"></i>Calculate Frequencies
-              </button>
-            </div>
-
-            <!-- Results -->
-            <div class="row mt-4">
-              <div class="col-md-6">
-                <div class="card bg-light">
-                  <div class="card-body">
-                    <h5 class="card-title">Undamped Natural Frequency</h5>
-                    <div class="display-4" id="undampedFreq">--</div>
-                    <span class="text-muted">Hz</span>
-                    <div class="text-muted small mt-1">
-                      Formula: <br />
-                      \( f_n = \frac{1}{2\pi} \sqrt{\frac{k}{m}} \)
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="card bg-light">
-                  <div class="card-body">
-                    <h5 class="card-title">Damped Natural Frequency</h5>
-                    <div class="display-4" id="dampedFreq">--</div>
-                    <span class="text-muted">Hz</span>
-                    <div class="text-muted small mt-1">
-                      Formula: <br />
-                      \( f_d = \frac{1}{2\pi} \sqrt{\frac{k}{m} -
-                      \left(\frac{c}{2m}\right)^2} \)
-                    </div>
-                    <div id="dampingStatus" class="small mt-1"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      <script>
-        document.addEventListener("DOMContentLoaded", () => {
-          const calculateBtn = document.getElementById("calculateBtn");
-          const massInput = document.getElementById("massInput");
-          const stiffnessInput = document.getElementById("stiffnessInput");
-          const dampingInput = document.getElementById("dampingInput");
-          const undampedFreq = document.getElementById("undampedFreq");
-          const dampedFreq = document.getElementById("dampedFreq");
-          const dampingStatus = document.getElementById("dampingStatus");
-
-          function validateInput(value, min, max) {
-            const numValue = parseFloat(value);
-            return Math.max(min, Math.min(max, numValue));
-          }
-
-          calculateBtn.addEventListener("click", () => {
-            // Validate and parse inputs with high precision
-            const m = validateInput(massInput.value, 0.0001, 50);
-            const k = validateInput(stiffnessInput.value, 100, 100000);
-            const c = validateInput(dampingInput.value, 0, 500);
-
-            // Update input fields with validated values
-            massInput.value = m.toFixed(4);
-            stiffnessInput.value = k.toFixed(2);
-            dampingInput.value = c.toFixed(3);
-
-            // Calculate with full precision
-            const omega_n = Math.sqrt(k / m);
-            const f_n = omega_n / (2 * Math.PI);
-            undampedFreq.textContent = f_n.toFixed(5); // 5 decimal places
-
-            const zeta = c / (2 * Math.sqrt(m * k));
-            if (zeta < 1) {
-              const omega_d = omega_n * Math.sqrt(1 - zeta ** 2);
-              const f_d = omega_d / (2 * Math.PI);
-              dampedFreq.textContent = f_d.toFixed(5); // 5 decimal places
-              dampingStatus.innerHTML = `Damping ratio (ζ): ${zeta.toFixed(
-                5
-              )}<br>System is underdamped`;
-              dampingStatus.className = "text-success small mt-1";
-            } else {
-              dampedFreq.textContent = "N/A (No oscillation)";
-              dampingStatus.innerHTML = `Damping ratio (ζ): ${zeta.toFixed(
-                5
-              )}<br>System is overdamped`;
-              dampingStatus.className = "text-danger small mt-1";
-            }
-          });
-        });
-      </script>
-
-      <style>
-        .input-group input[type="number"] {
-          text-align: right;
-          font-family: monospace;
-        }
-        .display-4 {
-          font-family: monospace;
-          letter-spacing: -0.05em;
-        }
-        .small {
-          font-size: 0.85em;
-        }
-      </style>
-      <!-- Tab 3 Content (Completely Separate) -->
-      <div id="tab-3" class="tab-content">
-        <div class="card">
-          <div class="card-header">
-            <i class="fas fa-chart-pie me-2"></i>Tab 3 Content
-          </div>
-          <div class="card-body">
-            <h5>Independent Tab 3 Content</h5>
-            <p>
-              This is completely separate from both other tabs. Add any unique
-              content here.
-            </p>
-            <div class="alert alert-warning">
-              <i class="fas fa-exclamation-triangle me-2"></i>
-              Example content for Tab 3
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Simple test plot script -->
-    <script src="{{ url_for('static', filename='js/simple-plot.js') }}"></script>
-
-    <!-- Custom JavaScript -->
+    
     <script>
-      const form = document.getElementById("prediction-form");
-      const pathSelect = document.getElementById("path-select");
-      const densityOutput = document.getElementById("density-output");
-      const viscosityOutput = document.getElementById("viscosity-output");
-      const animationContainer = document.getElementById("animation-container");
-      const tabBtns = document.querySelectorAll(".tab-btn");
-      const tabContents = document.querySelectorAll(".tab-content");
 
-      // Add debug logging
-      console.log("Main script initialized");
+        // Define material colors for consistent visualization
+        const materialColors = {
+            primary: '#1a365d',     // Dark blue for theoretical
+            secondary: '#4299e1',   // Light blue for experimental
+            background: '#ffffff',  // White
+            textColor: '#2d3748',   // Dark gray
+            gridColor: '#e2e8f0'    // Light gray
+        };
 
-      // Tab switching functionality
-      tabBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const tabId = btn.getAttribute("data-tab");
+        // Dashboard tab switching functionality
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
 
-          // Remove active class from all buttons and tabs
-          tabBtns.forEach((b) => b.classList.remove("active"));
-          tabContents.forEach((tab) => tab.classList.remove("active"));
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and tabs
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(tab => tab.classList.remove('active'));
+                
+                // Add active class to current button and tab
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
 
-          // Add active class to current button and tab
-          btn.classList.add("active");
-          document.getElementById(tabId).classList.add("active");
+                // Initialize chart if calculator tab is shown
+                if (tabId === 'calculator-tab') {
+                    // Ensure chart is initialized and visible after tab is shown
+                    setTimeout(() => {
+                        if (!oscillationChart) {
+                            console.log("Initializing chart after tab switch");
+                            initChart();
+                        } else {
+                            console.log("Resizing existing chart");
+                            oscillationChart.resize();
+                        }
+                        calculate();
+                    }, 300); // Increased timeout to ensure DOM is ready
+                }
+                
+                // Initialize fluid response chart if viscosity tab is shown
+                if (tabId === 'viscosity-tab') {
+                    // Ensure chart is initialized and visible after tab is shown
+                    setTimeout(() => {
+                        initFluidResponseChart();
+                    }, 300);
+                }
+            });
         });
-      });
 
-      function updateResults(data) {
-        console.log("Updating results with data:", data);
-
-        // Parse the values from the strings
-        const densityMatch = data.density.match(/(\d+\.\d+)/);
-        const viscosityMatch = data.viscosity.match(/(\d+\.\d+)/);
-
-        densityOutput.innerHTML = `
-                <div>
-                    <div class="value-label">Density</div>
-                    <div class="value-number">${
-                      densityMatch ? densityMatch[1] : "--"
-                    }</div>
-                    <div class="value-unit">kg/m³</div>
-                </div>
-            `;
-
-        viscosityOutput.innerHTML = `
-                <div>
-                    <div class="value-label">Viscosity</div>
-                    <div class="value-number">${
-                      viscosityMatch ? viscosityMatch[1] : "--"
-                    }</div>
-                    <div class="value-unit">mPa·s</div>
-                </div>
-            `;
-      }
-
-      // Handle Form Submission
-      form.addEventListener("submit", function (event) {
-        event.preventDefault();
-        console.log("Form submitted");
-
-        const selectedPath = pathSelect.value;
-        console.log("Selected path:", selectedPath);
-
-        const loadingHTML = `
+        // Material selection from sidebar
+        const materialItems = document.querySelectorAll('.material-item');
+        const mobileMaterialSelect = document.getElementById('mobile-material-select');
+        
+        // Function to select a material and update UI
+        function selectMaterial(materialName) {
+            // Update active state in sidebar for both test and train sections
+            materialItems.forEach(item => {
+                if (item.getAttribute('data-material') === materialName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Update mobile dropdown if it exists
+            if (mobileMaterialSelect) {
+                mobileMaterialSelect.value = materialName;
+            }
+            
+            // Show loading indicators
+            const loadingHTML = `
                 <div>
                     <div class="value-label">Calculating</div>
                     <div class="value-number">
@@ -658,124 +621,973 @@
                     </div>
                 </div>
             `;
-
-        densityOutput.innerHTML = loadingHTML;
-        viscosityOutput.innerHTML = loadingHTML;
-
-        // Show loading indicator for animation (just the indicator, not fetching yet)
-        if (selectedPath && selectedPath !== "Choose a path...") {
-          animationContainer.innerHTML = `
-                    <div class="text-center">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p>Loading analysis results...</p>
-                    </div>
+            
+            document.getElementById('density-output').innerHTML = loadingHTML;
+            document.getElementById('viscosity-output').innerHTML = loadingHTML;
+            
+            // Fetch material data and update dashboard
+            fetchMaterialData(materialName);
+            
+            // Update calculator tab with the selected material's damping ratio
+            if (typeof getMaterialDampingRatio === 'function') {
+                getMaterialDampingRatio(materialName);
+            } else {
+                console.log('Calculator tab not yet initialized');
+            }
+        }
+        
+        // Event listeners for material selection for both test and train sections
+        materialItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const materialName = item.getAttribute('data-material');
+                selectMaterial(materialName);
+            });
+        });
+        
+        // Mobile dropdown change handler
+        if (mobileMaterialSelect) {
+            mobileMaterialSelect.addEventListener('change', () => {
+                const materialName = mobileMaterialSelect.value;
+                if (materialName !== 'Choose a material...') {
+                    selectMaterial(materialName);
+                }
+            });
+        }
+        
+        // Function to fetch material data from server
+        function fetchMaterialData(materialName) {
+            console.log("Fetching data for:", materialName);
+            
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ path: materialName }),
+            })
+            .then(response => {
+                console.log("Response received:", response);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Data received:", data);
+                if (data.error) {
+                    console.error('Server Error:', data.error);
+                    showError();
+                } else {
+                    updateDashboard(data, materialName);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                showError();
+            });
+        }
+        
+        // Function to update the dashboard with material data
+        function updateDashboard(data, materialName) {
+            // Update density and viscosity cards
+            const densityMatch = data.density.match(/(\d+\.\d+)/);
+            const viscosityMatch = data.viscosity.match(/(\d+\.\d+)/);
+            
+            document.getElementById('density-output').innerHTML = `
+                <div>
+                    <div class="value-label">Density</div>
+                    <div class="value-number">${densityMatch ? densityMatch[1] : '--'}</div>
+                    <div class="value-unit">kg/m³</div>
+                </div>
+            `;
+            
+            document.getElementById('viscosity-output').innerHTML = `
+                <div>
+                    <div class="value-label">Viscosity</div>
+                    <div class="value-number">${viscosityMatch ? viscosityMatch[1] : '--'}</div>
+                    <div class="value-unit">mPa·s</div>
+                </div>
+            `;
+            
+            // Use the raw density and viscosity values from the API response
+            const density = data.raw_density;
+            const viscosity = data.raw_viscosity;
+            
+            // Log the values for debugging
+            console.log(`Using raw values - Density: ${density}, Viscosity: ${viscosity}`);
+            
+            // Request response data for comparison plot
+            fetch('/get_response_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    material: materialName,
+                    density: density,
+                    viscosity: viscosity
+                }),
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                if (responseData.success) {
+                    // Update damping values
+                    document.getElementById('exp-damping').textContent = responseData.experimental_zeta.toFixed(5);
+                    document.getElementById('theo-damping').textContent = responseData.theoretical_zeta.toFixed(5);
+                    
+                    // Update log decrement values
+                    document.getElementById('exp-decrement').textContent = responseData.experimental_delta.toFixed(5);
+                    document.getElementById('theo-decrement').textContent = responseData.theoretical_delta.toFixed(5);
+                    
+                    // Create comparison plot
+                    createComparisonPlot(responseData, materialName);
+                } else {
+                    document.getElementById('plot-instruction').innerHTML = `
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error: ${responseData.error || 'Failed to load response data'}
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching response data:', error);
+                document.getElementById('plot-instruction').innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error: Failed to load response data
                 `;
+            });
+        }
+        
+        // Function to create the comparison plot
+        function createComparisonPlot(data, materialName) {
+            const plotElement = document.getElementById('comparison-plot');
+            
+            // Hide the instruction message
+            document.getElementById('plot-instruction').style.display = 'none';
+            
+            // Create the plot
+            const traces = [
+                {
+                    x: data.time,
+                    y: data.experimental_response,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Experimental',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 2.5
+                    }
+                },
+                {
+                    x: data.time,
+                    y: data.theoretical_response,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theoretical',
+                    line: {
+                        color: materialColors.primary,
+                        width: 3
+                    }
+                }
+            ];
+            
+            // Add envelope traces
+            if (data.exp_envelope_upper && data.exp_envelope_lower) {
+                traces.push({
+                    x: data.time,
+                    y: data.exp_envelope_upper,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Exp Envelope',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+                
+                traces.push({
+                    x: data.time,
+                    y: data.exp_envelope_lower,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Exp Envelope',
+                    line: {
+                        color: materialColors.secondary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+            }
+            
+            if (data.theo_envelope_upper && data.theo_envelope_lower) {
+                traces.push({
+                    x: data.time,
+                    y: data.theo_envelope_upper,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theo Envelope',
+                    line: {
+                        color: materialColors.primary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+                
+                traces.push({
+                    x: data.time,
+                    y: data.theo_envelope_lower,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Theo Envelope',
+                    line: {
+                        color: materialColors.primary,
+                        width: 1,
+                        dash: 'dash'
+                    },
+                    showlegend: false,
+                    opacity: 0.5
+                });
+            }
+            
+            const layout = {
+                title: `Damped Response Analysis - ${materialName}`,
+                xaxis: {
+                    title: 'Time (s)',
+                    gridcolor: materialColors.gridColor
+                },
+                yaxis: {
+                    title: 'Displacement (mm)',
+                    gridcolor: materialColors.gridColor
+                },
+                font: {
+                    family: 'Inter, sans-serif',
+                    color: materialColors.textColor
+                },
+                plot_bgcolor: materialColors.background,
+                paper_bgcolor: materialColors.background,
+                margin: { t: 40, r: 10, b: 40, l: 50 },
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            };
+            
+            Plotly.newPlot(plotElement, traces, layout, { responsive: true });
+        }
+        
+        // Function to show error state
+        function showError() {
+            const errorHTML = `
+                <div>
+                    <div class="value-label">Error</div>
+                    <div class="value-number text-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('density-output').innerHTML = errorHTML;
+            document.getElementById('viscosity-output').innerHTML = errorHTML;
+            
+            document.getElementById('plot-instruction').innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error: Failed to load material data
+            `;
         }
 
-        console.log("Sending request to /predict endpoint");
-        fetch("/predict", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ path: selectedPath }),
-        })
-          .then((response) => {
-            console.log("Response received:", response);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
+    </script>
+    
+    <script>
+        
+        let oscillationChart = null;
+        let currentMaterialDampingRatio = 0.1; // Default damping ratio
+        
+        // Initialize beam calculation function based on provided code
+        function calculateBeamParameters() {
+            try {
+                // Get values from sliders and convert to proper units
+                const E = parseFloat(document.getElementById('youngModulusValue').textContent) * 1e9; // Convert GPa to Pa
+                const b = parseFloat(document.getElementById('beamWidthValue').textContent) / 1000; // Convert mm to m
+                const h = parseFloat(document.getElementById('beamThicknessValue').textContent) / 1000; // Convert mm to m
+                const L = parseFloat(document.getElementById('beamLengthValue').textContent) / 1000; // Convert mm to m
+                const zeta = currentMaterialDampingRatio; // Use material damping ratio
+                
+                // Natural frequency (fixed at 9 Hz as requested)
+                const naturalFreq = 9; // Hz
+                const omega_n = 2 * Math.PI * naturalFreq; // rad/s
+                
+                // Calculate moment of inertia
+                const I = (b * Math.pow(h, 3)) / 12; // m^4
+                
+                // Calculate stiffness for a cantilever beam
+                const k = 3 * E * I / Math.pow(L, 3); // N/m
+                
+                // Calculate equivalent mass
+                const m = k / Math.pow(omega_n, 2); // kg
+                
+                // Calculate damping coefficient
+                const c = 2 * zeta * m * omega_n; // N·s/m
+                
+                // Calculate damped natural frequency
+                let dampedFreq = 0;
+                if (zeta < 1) {
+                    // Underdamped
+                    dampedFreq = naturalFreq * Math.sqrt(1 - Math.pow(zeta, 2));
+                } else {
+                    // Critically damped or overdamped
+                    dampedFreq = 0;
+                }
+                
+                // Update the UI with the calculated values
+                document.getElementById('stiffnessResult').textContent = k.toFixed(2);
+                document.getElementById('massResult').textContent = m.toFixed(6);
+                document.getElementById('dampingResult').textContent = c.toFixed(4);
+                document.getElementById('undampedFreq').textContent = naturalFreq.toFixed(2);
+                            document.getElementById('dampedFreq').textContent = dampedFreq.toFixed(2);
+                
+                // Update the oscillation chart with the new parameters
+                updateOscillationChart(m, k, c, zeta);
+                
+                return { mass: m, stiffness: k, damping: c, zeta: zeta, naturalFreq: naturalFreq, dampedFreq: dampedFreq };
+            } catch (error) {
+                console.error("Error calculating beam parameters:", error);
+                return null;
             }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("Data received:", data);
-            if (data.error) {
-              console.error("Server Error:", data.error);
-              const errorHTML = `
-                        <div>
-                            <div class="value-label">Error</div>
-                            <div class="value-number text-danger">
-                                <i class="fas fa-exclamation-circle"></i>
-                            </div>
-                        </div>
-                    `;
-              densityOutput.innerHTML = errorHTML;
-              viscosityOutput.innerHTML = errorHTML;
-            } else {
-              updateResults(data);
+        }
+        
+        // Function to update the damping ratio display
+        function updateDampingRatioDisplay(zeta) {
+            // Update the displayed value
+            document.getElementById('damping-ratio-value').textContent = zeta.toFixed(3);
+            
+            // Update the progress bar (assuming max zeta is 1.0)
+            const progressPercent = Math.min(zeta * 100, 100);
+            const progressBar = document.getElementById('damping-ratio-progress');
+            progressBar.style.width = `${progressPercent}%`;
+            progressBar.setAttribute('aria-valuenow', progressPercent);
+            
+            // Update color based on damping ratio
+            if (zeta < 0.3) {
+                progressBar.className = 'progress-bar bg-success';
+            } else if (zeta < 0.8) {
+                progressBar.className = 'progress-bar bg-warning';
+                } else {
+                progressBar.className = 'progress-bar bg-danger';
+            }
+            
+            // Store the current damping ratio
+            currentMaterialDampingRatio = zeta;
+        }
+        
+        // Function to get damping ratio for a material from backend
+        function getMaterialDampingRatio(materialName) {
+            // Show loading state
+            const materialNameEl = document.getElementById('calculator-material-name');
+            if (materialNameEl) {
+                materialNameEl.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Loading ${materialName} properties...`;
+            }
+            
+            // Fetch damping ratio from backend via get_response_data endpoint
+            fetch('/get_response_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    material: materialName
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Extract the damping ratio from the response
+                    const dampingRatio = data.theoretical_zeta || 0.1;
+                    
+                    // Update the UI
+                    if (materialNameEl) {
+                        materialNameEl.innerHTML = `<i class="fas fa-flask me-2"></i>Material: <strong>${materialName}</strong>`;
+                    }
+                    
+                    // Update damping ratio display
+                    updateDampingRatioDisplay(dampingRatio);
+                    
+                    // Recalculate and update visualization
+                    calculateBeamParameters();
+                    
+                    console.log(`Loaded damping ratio for ${materialName}: ${dampingRatio}`);
+                } else {
+                    console.error('Error fetching material data:', data.error);
+                        materialNameEl.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>Error loading ${materialName}`;
+                    
+                    // Use default damping ratio
+                    updateDampingRatioDisplay(0.1);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching damping ratio:', error);
+                if (materialNameEl) {
+                    materialNameEl.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>Error loading ${materialName}`;
+                }
+                
+                // Use default damping ratio
+                updateDampingRatioDisplay(0.1);
+            });
+        }
+        
+        // Initialize or update the oscillation chart
+        function initChart() {
+            try {
+                console.log("Initializing oscillation chart...");
+                const chartCanvas = document.getElementById('oscillationChart');
+                
+                // Check if the canvas element exists and is visible
+                if (!chartCanvas) {
+                    console.error("Chart canvas element not found!");
+                    return;
+                }
+                
+                // If chart already exists, destroy it to prevent duplicates
+                if (oscillationChart) {
+                    console.log("Destroying existing chart instance");
+                    oscillationChart.destroy();
+                    oscillationChart = null;
+                }
+                
+                // Generate default data
+                const data = [];
+                const labels = [];
+                const timeStep = 0.01;
+                const maxTime = 2; // 2 seconds of data
+                
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    labels.push(t.toFixed(2));
+                    // Default underdamped oscillation with fixed frequency
+                    const amplitude = Math.exp(-0.1 * t * 2 * Math.PI * 9) * Math.cos(2 * Math.PI * 9 * t);
+                    data.push(amplitude);
+                }
+                
+                // Create chart
+                const ctx = chartCanvas.getContext('2d');
+                oscillationChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Displacement',
+                            data: data,
+                            borderColor: 'rgb(66, 133, 244)',
+                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 0 },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time (s)'
+                                },
+                                ticks: { maxTicksLimit: 10 }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Displacement'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { mode: 'index', intersect: false }
+                        }
+                    }
+                });
+                
+                console.log("Chart initialized successfully!");
+                
+            } catch (error) {
+                console.error("Error initializing chart:", error);
+            }
+        }
+        
+        // Update the oscillation chart with new parameters
+        function updateOscillationChart(mass, stiffness, damping, zeta) {
+            try {
+                // If chart doesn't exist, initialize it
+                if (!oscillationChart) {
+                    initChart();
+                    return;
+                }
+                
+                // Generate new data based on parameters
+                const data = [];
+                const timeStep = 0.01;
+                const maxTime = 2; // 2 seconds of data
+                
+                // Use fixed natural frequency of 9 Hz
+                const naturalFreq = 9; // Hz
+                const omega_n = 2 * Math.PI * naturalFreq; // rad/s
+                
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    let displacement = 0;
+                    
+                    if (zeta < 1) {
+                        // Underdamped case
+                        const dampedFreq = omega_n * Math.sqrt(1 - zeta * zeta);
+                        displacement = Math.exp(-zeta * omega_n * t) * Math.cos(dampedFreq * t);
+                    } else if (Math.abs(zeta - 1) < 0.001) {
+                        // Critically damped case
+                        displacement = Math.exp(-omega_n * t) * (1 + omega_n * t);
+                    } else {
+                        // Overdamped case
+                        const s1 = -zeta * omega_n + omega_n * Math.sqrt(zeta * zeta - 1);
+                        const s2 = -zeta * omega_n - omega_n * Math.sqrt(zeta * zeta - 1);
+                        displacement = ((s2 * Math.exp(s1 * t) - s1 * Math.exp(s2 * t)) / (s2 - s1));
+                    }
+                    
+                    data.push(displacement);
+                }
+                
+                // Update chart data
+                oscillationChart.data.datasets[0].data = data;
+                oscillationChart.update();
+                console.log("Chart updated with new parameters");
+                
+            } catch (error) {
+                console.error("Error updating oscillation chart:", error);
+            }
+        }
+        
+        // Add event listeners when the document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize slider value displays
+            const sliders = {
+                'youngModulusSlider': 'youngModulusValue',
+                'beamWidthSlider': 'beamWidthValue',
+                'beamThicknessSlider': 'beamThicknessValue',
+                'beamLengthSlider': 'beamLengthValue'
+            };
+            
+            // Update displayed values and recalculate in real-time when sliders change
+            for (const [sliderId, valueId] of Object.entries(sliders)) {
+                const slider = document.getElementById(sliderId);
+                const value = document.getElementById(valueId);
+                
+                if (slider && value) {
+                    slider.addEventListener('input', function() {
+                            value.textContent = this.value;
+                        // Recalculate parameters in real-time
+                        calculateBeamParameters();
+                    });
+                }
+            }
+            
+            // Add material selection event to sidebar items
+            const materialItems = document.querySelectorAll('.material-item');
+            materialItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const materialName = this.getAttribute('data-material');
+                    if (materialName) {
+                        // Update selected material in calculator tab
+                        getMaterialDampingRatio(materialName);
+                    }
+                });
+            });
+            
+            // Also connect the mobile dropdown
+            const mobileMaterialSelect = document.getElementById('mobile-material-select');
+            if (mobileMaterialSelect) {
+                mobileMaterialSelect.addEventListener('change', function() {
+                    const materialName = this.value;
+                    if (materialName && materialName !== 'Choose a material...') {
+                        // Update selected material in calculator tab
+                        getMaterialDampingRatio(materialName);
+                    }
+                });
+            }
+            
+            // Initialize chart when calculator tab is active
+            if (document.getElementById('calculator-tab').classList.contains('active')) {
+                setTimeout(() => {
+                    initChart();
+                    calculateBeamParameters();
+                }, 500);
+            }
+            
+            // Update chart when tab is shown
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.getAttribute('data-tab') === 'calculator-tab') {
+                        setTimeout(() => {
+                            if (!oscillationChart) {
+                                initChart();
+                            } else {
+                                oscillationChart.resize();
+                            }
+                            calculateBeamParameters();
+                        }, 500);
+                    }
+                });
+            });
+        });
 
-              // Now fetch the animation after density/viscosity data is loaded
-              if (selectedPath && selectedPath !== "Choose a path...") {
-                // Update loading message for animation
-                animationContainer.innerHTML = `
-                            <div class="text-center">
-                                <div class="spinner-border text-primary mb-3" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p>Loading animation for ${selectedPath}...</p>
-                            </div>
-                        `;
+    </script>
+    
+    <script>
 
-                // Request the animation
-                fetch("/generate_animation", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ material: selectedPath }),
+        let fluidResponseChart = null;
+        
+        // Function to initialize the fluid response chart with dummy data
+        function initFluidResponseChart() {
+            try {
+                console.log("Initializing fluid response chart...");
+                const chartCanvas = document.getElementById('fluidResponseChart');
+                
+                // Check if the canvas element exists
+                if (!chartCanvas) {
+                    console.error("Fluid response chart canvas element not found!");
+                    return;
+                }
+                
+                // If chart already exists, destroy it to prevent duplicates
+                if (fluidResponseChart) {
+                    fluidResponseChart.destroy();
+                    fluidResponseChart = null;
+                }
+                
+                // Generate dummy data for the chart
+                const labels = [];
+                const data = [];
+                const timeStep = 0.01;
+                const maxTime = 1.5;
+                
+                // Simple dummy oscillation that decays (just for UI demonstration)
+                for (let t = 0; t <= maxTime; t += timeStep) {
+                    labels.push(t.toFixed(2));
+                    // Dummy formula to show a decaying oscillation
+                    const amplitude = Math.exp(-0.2 * t) * Math.cos(20 * t);
+                    data.push(amplitude);
+                }
+                
+                // Create the chart
+                const ctx = chartCanvas.getContext('2d');
+                fluidResponseChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Response',
+                            data: data,
+                            borderColor: 'rgb(66, 133, 244)',
+                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time (s)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Amplitude'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        }
+                    }
+                });
+                
+                console.log("Fluid response chart initialized successfully!");
+            } catch (error) {
+                console.error("Error initializing fluid response chart:", error);
+            }
+        }
+        
+        // Function to analyze fluid properties
+        function analyzeFluidProperties() {
+            try {
+                // Get values from sliders
+                const density = parseFloat(document.getElementById('densitySlider').value);
+                const viscosity = parseFloat(document.getElementById('viscositySlider').value);
+                
+                // Show loading indicators
+                document.getElementById('dampingRatio').innerText = "--";
+                document.getElementById('viscDampingType').textContent = "--";
+                document.getElementById('viscDampingType').className = "badge bg-secondary";
+                document.getElementById('analysisStatus').innerHTML = `
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    <strong>Analyzing...</strong> Processing fluid properties...
+                `;
+                document.getElementById('analysisStatus').classList.remove('alert-success', 'alert-danger');
+                document.getElementById('analysisStatus').classList.add('alert-info');
+                
+                // Make API call to analyze viscosity
+                fetch('/analyze_viscosity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        viscosity: viscosity,
+                        density: density
+                    }),
                 })
-                  .then((response) => {
+                .then(response => {
                     if (!response.ok) {
-                      return response.json().then((data) => {
-                        throw new Error(
-                          data.error || "Failed to generate animation"
-                        );
-                      });
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
-                  })
-                  .then((data) => {
-                    if (data.success && data.animation_path) {
-                      // Add timestamp to prevent caching
-                      const timestamp = new Date().getTime();
-                      const animationPath = `${data.animation_path}?t=${timestamp}`;
-
-                      // Display the animation
-                      animationContainer.innerHTML = `
-                                    <img src="${animationPath}" alt="Damped Response Animation" class="animation-gif" />
-                                `;
-                    } else {
-                      throw new Error("Animation generation failed");
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Animation Error:", error);
-                    animationContainer.innerHTML = `
-                                <div class="text-center text-danger">
-                                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                                    <p>${error.message}</p>
-                                </div>
-                            `;
-                  });
-              }
-            }
-          })
-          .catch((error) => {
-            console.error("Fetch Error:", error);
-            const networkErrorHTML = `
-                    <div>
-                        <div class="value-label">Network Error</div>
-                        <div class="value-number text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                    </div>
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Extract the damping ratio
+                        const dampingRatio = data.damping_ratio || data.experimental_zeta;
+                
+                // Update the damping ratio display
+                        document.getElementById('dampingRatio').innerText = dampingRatio.toFixed(4);
+                
+                        // Determine damping type and set appropriate badge color
+                let dampingType = "";
+                        let badgeClass = "";
+                        if (dampingRatio < 1) {
+                    dampingType = "Underdamped";
+                            badgeClass = "bg-success";
+                        } else if (dampingRatio == 1) {
+                    dampingType = "Critical";
+                            badgeClass = "bg-warning text-dark";
+                } else {
+                    dampingType = "Overdamped";
+                            badgeClass = "bg-danger";
+                }
+                
+                // Update damping type display
+                        const dampTypeElement = document.getElementById('viscDampingType');
+                        dampTypeElement.textContent = dampingType;
+                        dampTypeElement.className = `badge ${badgeClass}`;
+                
+                // Update analysis status
+                document.getElementById('analysisStatus').innerHTML = `
+                    <i class="fas fa-check-circle me-2 text-success"></i>
+                            <strong>Analysis complete!</strong> Results calculated for density ${density} kg/m³ and viscosity ${viscosity} mPa·s.
                 `;
-            densityOutput.innerHTML = networkErrorHTML;
-            viscosityOutput.innerHTML = networkErrorHTML;
-          });
-      });
+                        document.getElementById('analysisStatus').classList.remove('alert-info', 'alert-danger');
+                document.getElementById('analysisStatus').classList.add('alert-success');
+                
+                        // Update the chart with the response data
+                        updateFluidResponseChartWithData(data);
+                    } else {
+                        throw new Error(data.error || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error analyzing fluid properties:', error);
+                    document.getElementById('analysisStatus').innerHTML = `
+                        <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                        <strong>Error:</strong> ${error.message || 'Failed to analyze fluid properties. Please check your inputs.'}
+                    `;
+                    document.getElementById('analysisStatus').classList.remove('alert-info', 'alert-success');
+                    document.getElementById('analysisStatus').classList.add('alert-danger');
+                });
+            } catch (error) {
+                console.error("Error analyzing fluid properties:", error);
+                document.getElementById('analysisStatus').innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2 text-danger"></i>
+                    <strong>Error:</strong> Failed to analyze fluid properties. Please check your inputs.
+                `;
+                document.getElementById('analysisStatus').classList.remove('alert-info', 'alert-success');
+                document.getElementById('analysisStatus').classList.add('alert-danger');
+            }
+        }
+        
+        // Function to update the fluid response chart with real data
+        function updateFluidResponseChartWithData(responseData) {
+            try {
+                // If chart doesn't exist, initialize it
+                if (!fluidResponseChart) {
+                    initFluidResponseChart();
+                    return;
+                }
+                
+                // Use the time and experimental response from the data
+                const time = responseData.time;
+                const response = responseData.experimental_response;
+                const upperEnvelope = responseData.exp_envelope_upper;
+                const lowerEnvelope = responseData.exp_envelope_lower;
+                
+                // Check the envelope toggle state
+                const showEnvelope = document.getElementById('showEnvelopeToggle').checked;
+                
+                // Format time to 2 decimal places for display
+                const formattedTime = time.map(t => parseFloat(t).toFixed(2));
+                
+                // Update chart data
+                fluidResponseChart.data.labels = formattedTime;
+                
+                // Start with the main response dataset
+                const datasets = [
+                    {
+                        label: 'Response',
+                        data: response,
+                        borderColor: 'rgb(66, 133, 244)',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        borderWidth: 2.5,
+                        tension: 0.2,
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ];
+                
+                // Add envelope datasets if enabled
+                if (showEnvelope) {
+                    datasets.push(
+                        {
+                            label: 'Envelope',
+                            data: upperEnvelope,
+                            borderColor: 'rgba(66, 133, 244, 0.6)',
+                            borderDash: [5, 5],
+                            tension: 0.2,
+                            fill: false,
+                            pointRadius: 0,
+                            borderWidth: 1.5
+                        },
+                        {
+                            label: 'Lower Envelope',
+                            data: lowerEnvelope,
+                            borderColor: 'rgba(66, 133, 244, 0.6)',
+                            borderDash: [5, 5],
+                            tension: 0.2,
+                            fill: false,
+                            pointRadius: 0,
+                            borderWidth: 1.5,
+                            hidden: true
+                        },
+                        {
+                            label: 'Envelope Area',
+                            data: [...Array(time.length).keys()].map(i => ({
+                                x: formattedTime[i],
+                                y: upperEnvelope[i]
+                            })).concat([...Array(time.length).keys()].reverse().map(i => ({
+                                x: formattedTime[i],
+                                y: lowerEnvelope[i]
+                            }))),
+                            fill: true,
+                            backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                            borderWidth: 0,
+                            pointRadius: 0,
+                            showLine: true,
+                            hidden: true
+                        }
+                    );
+                }
+                
+                fluidResponseChart.data.datasets = datasets;
+                
+                // Update chart
+                fluidResponseChart.update();
+                console.log("Fluid response chart updated with real data");
+                
+            } catch (error) {
+                console.error("Error updating fluid response chart with real data:", error);
+            }
+        }
+        
+        // Add event listeners when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize sliders
+            const densitySlider = document.getElementById('densitySlider');
+            const viscositySlider = document.getElementById('viscositySlider');
+            const densityValue = document.getElementById('densityValue');
+            const viscosityValue = document.getElementById('viscosityValue');
+            
+            // Update displayed values when sliders change
+            if (densitySlider && densityValue) {
+                densitySlider.addEventListener('input', function() {
+                    densityValue.textContent = this.value;
+                });
+            }
+            
+            if (viscositySlider && viscosityValue) {
+                viscositySlider.addEventListener('input', function() {
+                    viscosityValue.textContent = this.value;
+                });
+            }
+            
+            // Add analyze button event listener
+            const analyzeViscosityBtn = document.getElementById('analyzeViscosityBtn');
+            if (analyzeViscosityBtn) {
+                analyzeViscosityBtn.addEventListener('click', analyzeFluidProperties);
+            }
+            
+            // Add envelope toggle event listener
+            const envelopeToggle = document.getElementById('showEnvelopeToggle');
+            if (envelopeToggle) {
+                envelopeToggle.addEventListener('change', function() {
+                    // If we have a chart and data, update it with the new setting
+                    if (fluidResponseChart && fluidResponseChart.data) {
+                        // Re-analyze to update the chart
+                        if (document.getElementById('dampingRatio').innerText !== "--") {
+                            analyzeFluidProperties();
+                        }
+                    }
+                });
+            }
+            
+            // Initialize chart if viscosity tab is active on page load
+            if (document.getElementById('viscosity-tab').classList.contains('active')) {
+                setTimeout(initFluidResponseChart, 300);
+            }
+            
+            // Update chart when tab is shown
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.getAttribute('data-tab') === 'viscosity-tab') {
+                        // Initialize chart with a delay to ensure the tab is visible
+                        setTimeout(() => {
+                            if (!fluidResponseChart) {
+                                initFluidResponseChart();
+                            } else {
+                                fluidResponseChart.resize();
+                            }
+                        }, 300);
+                    }
+                });
+            });
+        });
+  
     </script>
-  </body>
+</body>
 </html>
